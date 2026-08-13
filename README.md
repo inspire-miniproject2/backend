@@ -129,7 +129,8 @@ Config Server는 [config-repo](config-repo)의 설정을 읽습니다. 서비스
 - `.env`는 커밋하지 않습니다.
 - 비밀번호, 토큰, 운영 서버 주소는 GitHub Actions Secrets 또는 배포 환경에 저장합니다.
 - 기능 브랜치는 `feature/<name>` 형식을 권장합니다.
-- Pull Request에서 CI가 통과한 뒤 병합합니다.
+- 현재 Spring Boot 소스가 없으므로 CI는 GitHub Actions 화면에서 필요할 때만 수동 실행합니다.
+- 첫 서비스 소스가 추가되면 Pull Request와 `develop` Push에서 CI가 자동 실행되도록 전환합니다.
 - GitHub Actions의 `Container Images`를 수동 실행하면 선택한 서비스만 GHCR 이미지로 발행됩니다.
 - 실제 서버 배포는 배포 대상과 GitHub Secrets가 정해진 뒤 연결합니다.
 

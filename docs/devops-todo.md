@@ -10,11 +10,13 @@
 - [x] 서비스별 Dockerfile과 Docker Compose 기본 구성
 - [x] GitHub Actions 테스트·Compose 검증 구성
 - [x] CI 검사를 단일 Runner로 통합하고 중복 실행 자동 취소
+- [x] 백엔드 소스가 들어오기 전까지 CI를 수동 실행으로 전환
 - [x] 컨테이너 이미지 발행을 필요한 서비스만 선택하는 수동 실행으로 경량화
 - [x] 커밋 규칙과 PR 템플릿 구성
 
 ## 백엔드 소스가 들어오면
 
+- [ ] CI 트리거를 Pull Request와 `develop` Push 자동 실행으로 전환
 - [ ] 모든 서비스 `./gradlew test` 통과
 - [ ] 모든 서비스 Docker 이미지 빌드
 - [ ] Config Server 설정 조회 확인
