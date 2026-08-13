@@ -9,6 +9,28 @@ permissions:
   contents: read
 
 jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate commit titles
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            ./scripts/validate-commit-message.sh --range "$BASE_SHA..$HEAD_SHA"
+          elif [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
+            ./scripts/validate-commit-message.sh --subject "$(git log -1 --format='%s')"
+          else
+            ./scripts/validate-commit-message.sh --range "$BEFORE_SHA..$HEAD_SHA"
+          fi
+
   validate-infra:
     runs-on: ubuntu-latest
     steps:
@@ -16,7 +38,7 @@ jobs:
       - name: Validate Docker Compose
         run: docker compose --env-file .env.example -f infra/docker-compose.yml -f infra/docker-compose.apps.yml config --quiet
       - name: Validate shell scripts
-        run: bash -n scripts/*.sh
+        run: bash -n scripts/*.sh .githooks/commit-msg
 
   test-backend:
     runs-on: ubuntu-latest

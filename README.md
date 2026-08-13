@@ -100,6 +100,8 @@ Compose는 각 서비스에 다음 설정을 전달합니다.
 
 ## Git 및 보안 규칙
 
+- 커밋과 Pull Request 규칙은 [CONTRIBUTING.md](CONTRIBUTING.md)를 따릅니다.
+- 저장소를 Clone한 뒤 `./scripts/setup-git-hooks.sh`를 한 번 실행합니다.
 - `.env`는 커밋하지 않습니다.
 - 비밀번호, 토큰, 운영 서버 주소는 GitHub Actions Secrets 또는 배포 환경에 저장합니다.
 - 기능 브랜치는 `feature/<name>` 형식을 권장합니다.
