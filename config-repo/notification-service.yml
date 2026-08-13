@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+  kafka:
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      ack-mode: record
+
+gcivil:
+  kafka:
+    topics:
+      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_TOPIC:complaint-status-changed.v1}
+      complaint-status-dlt: ${KAFKA_COMPLAINT_STATUS_DLT:complaint-status-changed.v1.dlt}
+

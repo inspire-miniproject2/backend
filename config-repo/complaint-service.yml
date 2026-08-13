@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+  kafka:
+    producer:
+      acks: all
+      retries: 3
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+      client:
+        config:
+          assignment-service:
+            connect-timeout: 2000
+            read-timeout: 3000
+
+gcivil:
+  kafka:
+    topics:
+      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_TOPIC:complaint-status-changed.v1}
