@@ -5,16 +5,21 @@ on:
   push:
     branches: [main, develop]
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
-  validate-commits:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Validate commit titles
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -31,35 +36,42 @@ jobs:
             ./scripts/validate-commit-message.sh --range "$BEFORE_SHA..$HEAD_SHA"
           fi
 
-  validate-infra:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - name: Validate Docker Compose
         run: docker compose --env-file .env.example -f infra/docker-compose.yml -f infra/docker-compose.apps.yml config --quiet
+
       - name: Validate shell scripts
         run: bash -n scripts/*.sh .githooks/commit-msg
 
-  test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+      - name: Detect Spring Boot source
+        id: backend
+        shell: bash
+        run: |
+          available=false
+          for service in discovery-service config-service gateway-service user-service complaint-service assignment-service notification-service; do
+            if [[ -f "$service/gradlew" ]]; then
+              available=true
+              break
+            fi
+          done
+          echo "available=$available" >> "$GITHUB_OUTPUT"
+          if [[ "$available" == "false" ]]; then
+            echo "No Spring Boot service source has been added yet."
+          fi
+
       - uses: actions/setup-java@v4
+        if: steps.backend.outputs.available == 'true'
         with:
           distribution: temurin
           java-version: "17"
+
       - name: Test available services
+        if: steps.backend.outputs.available == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          tested=0
           for service in discovery-service config-service gateway-service user-service complaint-service assignment-service notification-service; do
             if [[ -f "$service/gradlew" ]]; then
               echo "Testing $service"
               (cd "$service" && chmod +x gradlew && ./gradlew test --no-daemon)
-              tested=1
             fi
           done
-          if [[ "$tested" -eq 0 ]]; then
-            echo "No Spring Boot service source has been added yet."
-          fi
