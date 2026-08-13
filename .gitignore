@@ -1,0 +1,23 @@
+.DS_Store
+.idea/
+*.iml
+
+# Local secrets
+.env
+!.env.example
+
+# Java / Gradle
+**/.gradle/
+**/build/
+**/out/
+*.log
+
+# Node
+**/node_modules/
+**/.next/
+**/dist/
+**/coverage/
+
+# Local runtime data
+infra/data/
+

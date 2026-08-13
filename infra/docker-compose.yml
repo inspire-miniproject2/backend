@@ -1,0 +1,108 @@
+name: ${COMPOSE_PROJECT_NAME:-g-civil-msa}
+
+services:
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: g-civil-kafka
+    restart: unless-stopped
+    ports:
+      - "${KAFKA_HOST_PORT:-9092}:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: CONTROLLER://:9093,INTERNAL://:29092,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:${KAFKA_HOST_PORT:-9092}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks: [g-civil-network]
+
+  complaint-db:
+    image: mariadb:11.4
+    container_name: g-civil-complaint-db
+    restart: unless-stopped
+    ports:
+      - "${COMPLAINT_DB_HOST_PORT:-3307}:3306"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      MARIADB_DATABASE: ${COMPLAINT_DB_NAME:-complaint_db}
+      MARIADB_USER: ${COMPLAINT_DB_USER:-complaint}
+      MARIADB_PASSWORD: ${COMPLAINT_DB_PASSWORD:?set COMPLAINT_DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${COMPLAINT_DB_ROOT_PASSWORD:?set COMPLAINT_DB_ROOT_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    volumes:
+      - complaint-db-data:/var/lib/mysql
+    networks: [g-civil-network]
+
+  department-db:
+    image: mariadb:11.4
+    container_name: g-civil-department-db
+    restart: unless-stopped
+    ports:
+      - "${DEPARTMENT_DB_HOST_PORT:-3308}:3306"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      MARIADB_DATABASE: ${DEPARTMENT_DB_NAME:-department_db}
+      MARIADB_USER: ${DEPARTMENT_DB_USER:-department}
+      MARIADB_PASSWORD: ${DEPARTMENT_DB_PASSWORD:?set DEPARTMENT_DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${DEPARTMENT_DB_ROOT_PASSWORD:?set DEPARTMENT_DB_ROOT_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    volumes:
+      - department-db-data:/var/lib/mysql
+    networks: [g-civil-network]
+
+  notification-db:
+    image: mariadb:11.4
+    container_name: g-civil-notification-db
+    restart: unless-stopped
+    ports:
+      - "${NOTIFICATION_DB_HOST_PORT:-3309}:3306"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      MARIADB_DATABASE: ${NOTIFICATION_DB_NAME:-notification_db}
+      MARIADB_USER: ${NOTIFICATION_DB_USER:-notification}
+      MARIADB_PASSWORD: ${NOTIFICATION_DB_PASSWORD:?set NOTIFICATION_DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${NOTIFICATION_DB_ROOT_PASSWORD:?set NOTIFICATION_DB_ROOT_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    volumes:
+      - notification-db-data:/var/lib/mysql
+    networks: [g-civil-network]
+
+networks:
+  g-civil-network:
+    name: g-civil-network
+
+volumes:
+  kafka-data:
+  complaint-db-data:
+  department-db-data:
+  notification-db-data:
+

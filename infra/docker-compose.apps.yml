@@ -1,0 +1,111 @@
+services:
+  config-service:
+    build:
+      context: ../config-service
+    restart: unless-stopped
+    ports:
+      - "${CONFIG_PORT:-8888}:8888"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      SERVER_PORT: 8888
+    networks: [g-civil-network]
+
+  discovery-service:
+    build:
+      context: ../discovery-service
+    restart: unless-stopped
+    depends_on:
+      - config-service
+    ports:
+      - "${DISCOVERY_PORT:-8761}:8761"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      SERVER_PORT: 8761
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+    networks: [g-civil-network]
+
+  gateway-service:
+    build:
+      context: ../gateway-service
+    restart: unless-stopped
+    depends_on:
+      - config-service
+      - discovery-service
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      SERVER_PORT: 8080
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+    networks: [g-civil-network]
+
+  complaint-service:
+    build:
+      context: ../complaint-service
+    restart: unless-stopped
+    depends_on:
+      complaint-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    ports:
+      - "${COMPLAINT_PORT:-8081}:8081"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      SERVER_PORT: 8081
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mariadb://complaint-db:3306/${COMPLAINT_DB_NAME:-complaint_db}
+      SPRING_DATASOURCE_USERNAME: ${COMPLAINT_DB_USER:-complaint}
+      SPRING_DATASOURCE_PASSWORD: ${COMPLAINT_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks: [g-civil-network]
+
+  department-service:
+    build:
+      context: ../department-service
+    restart: unless-stopped
+    depends_on:
+      department-db:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    ports:
+      - "${DEPARTMENT_PORT:-8082}:8082"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      SERVER_PORT: 8082
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mariadb://department-db:3306/${DEPARTMENT_DB_NAME:-department_db}
+      SPRING_DATASOURCE_USERNAME: ${DEPARTMENT_DB_USER:-department}
+      SPRING_DATASOURCE_PASSWORD: ${DEPARTMENT_DB_PASSWORD}
+    networks: [g-civil-network]
+
+  notification-service:
+    build:
+      context: ../notification-service
+    restart: unless-stopped
+    depends_on:
+      notification-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    ports:
+      - "${NOTIFICATION_PORT:-8083}:8083"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      SERVER_PORT: 8083
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mariadb://notification-db:3306/${NOTIFICATION_DB_NAME:-notification_db}
+      SPRING_DATASOURCE_USERNAME: ${NOTIFICATION_DB_USER:-notification}
+      SPRING_DATASOURCE_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks: [g-civil-network]
+
