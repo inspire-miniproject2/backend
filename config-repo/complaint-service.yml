@@ -23,4 +23,12 @@ spring:
 gcivil:
   kafka:
     topics:
-      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_TOPIC:complaint-status-changed.v1}
+      complaint-created: ${KAFKA_COMPLAINT_CREATED_TOPIC:complaint.created.v1}
+      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_TOPIC:complaint.status.changed.v1}
+  storage:
+    type: ${FILE_STORAGE_TYPE:local}
+    local:
+      path: ${LOCAL_STORAGE_PATH:/data/attachments}
+    s3:
+      region: ${AWS_REGION:ap-northeast-2}
+      bucket: ${S3_ATTACHMENT_BUCKET:}

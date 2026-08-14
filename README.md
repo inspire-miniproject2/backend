@@ -102,7 +102,7 @@ Kafka Topic을 확인하려면 다음 명령을 사용합니다.
 - User Service는 사용자와 Role을 소유하고 JWT를 발급합니다.
 - Gateway가 JWT를 검증하고 외부 요청의 단일 진입점 역할을 합니다.
 - Complaint Service는 Assignment Service를 OpenFeign으로 호출합니다.
-- 상태 변경 저장이 성공한 뒤 `complaint-status-changed.v1` 이벤트를 발행합니다.
+- 민원 생성과 상태 변경 저장이 성공한 뒤 `complaint.created.v1`, `complaint.status.changed.v1` 이벤트를 발행합니다.
 - Notification Service는 이벤트를 소비하고 자체 DB에 알림을 저장합니다.
 - 서비스는 다른 서비스의 DB를 직접 조회하거나 Foreign Key로 연결하지 않습니다.
 - 서비스 간 관계는 `userId`, `complaintId`, `departmentId`만 공유합니다.
@@ -118,9 +118,15 @@ Compose는 각 서비스에 다음 설정을 전달합니다.
 - `SPRING_KAFKA_BOOTSTRAP_SERVERS`: Kafka 내부 주소
 - `SERVER_PORT`: 서비스 포트
 - `JWT_SECRET`: JWT 서명 키
+- `JWT_ACCESS_TOKEN_EXPIRATION_MS`, `JWT_REFRESH_TOKEN_EXPIRATION_MS`: 토큰 만료시간(ms)
+- `KAFKA_COMPLAINT_CREATED_TOPIC`: 민원 생성 Topic
 - `KAFKA_COMPLAINT_STATUS_TOPIC`: 민원 상태 변경 Topic
+- `NOTIFICATION_KAFKA_GROUP_ID`: 알림 Consumer Group
+- `FILE_STORAGE_TYPE`: 첨부파일 저장 방식(`local` 또는 `s3`)
+- `LOCAL_STORAGE_PATH`, `AWS_REGION`, `S3_ATTACHMENT_BUCKET`: 첨부파일 저장소 설정
 
 Config Server는 [config-repo](config-repo)의 설정을 읽습니다. 서비스별 최소 `application.yml`에서는 애플리케이션 이름과 Config Server 연결만 지정하고, 비밀번호나 Secret을 저장하지 않습니다.
+전체 변수 이름, 필수 여부와 환경별 관리 기준은 [환경변수 규칙](docs/environment-variables.md)을 따릅니다.
 
 ## Git 및 보안 규칙
 

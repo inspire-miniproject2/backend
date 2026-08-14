@@ -8,7 +8,7 @@ spring:
           time_zone: Asia/Seoul
   kafka:
     consumer:
-      group-id: notification-service
+      group-id: ${NOTIFICATION_KAFKA_GROUP_ID:notification-service}
       auto-offset-reset: earliest
       enable-auto-commit: false
     listener:
@@ -17,6 +17,5 @@ spring:
 gcivil:
   kafka:
     topics:
-      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_TOPIC:complaint-status-changed.v1}
-      complaint-status-dlt: ${KAFKA_COMPLAINT_STATUS_DLT:complaint-status-changed.v1.dlt}
-
+      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_TOPIC:complaint.status.changed.v1}
+      complaint-status-dlt: ${KAFKA_COMPLAINT_STATUS_DLT:complaint.status.changed.v1.dlt}
