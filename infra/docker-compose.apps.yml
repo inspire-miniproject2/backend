@@ -64,9 +64,9 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     networks: [g-civil-network]
 
-  department-service:
+  assignment-service:
     build:
-      context: ../department-service
+      context: ../assignment-service
     restart: unless-stopped
     depends_on:
       department-db:
@@ -108,4 +108,3 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     networks: [g-civil-network]
-

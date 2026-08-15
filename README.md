@@ -24,7 +24,7 @@ g-civil-msa/
 ├── config-service/          # Spring Cloud Config Server
 ├── gateway-service/         # Spring Cloud Gateway
 ├── complaint-service/       # 민원 접수·처리
-├── department-service/      # 부서·배정
+├── assignment-service/      # 부서·배정
 ├── notification-service/    # Kafka 기반 알림
 ├── infra/                   # Docker Compose
 ├── scripts/                 # 실행·중지·점검
@@ -75,7 +75,7 @@ cp .env.example .env
 |---|---:|---|
 | API Gateway | 8080 | `gateway-service:8080` |
 | Complaint | 8081 | `complaint-service:8081` |
-| Department | 8082 | `department-service:8082` |
+| Assignment | 8082 | `assignment-service:8082` |
 | Notification | 8083 | `notification-service:8083` |
 | Config Server | 8888 | `config-service:8888` |
 | Eureka | 8761 | `discovery-service:8761` |
