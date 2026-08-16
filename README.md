@@ -34,6 +34,14 @@ g-civil-msa/
 └── .github/workflows/       # CI
 ```
 
+## 현재 구현 상태와 확장 합의
+
+- 현재 추적 중인 6개 서비스 디렉터리는 `README.md`, `Dockerfile`, `.dockerignore`만 있는 구현 전 골격이다.
+- 계약상 필요한 `user-service`와 `statistics-service`는 아직 저장소에 없다. 담당자와 생성 시점을 합의한 뒤 기존 루트 구조에 추가한다.
+- 두 서비스가 추가되기 전까지 Compose와 CI에 존재하지 않는 build context를 임의로 선언하지 않는다.
+- 계약의 표준 서비스명은 `assignment-service`다. 로컬 인프라의 `department-db`와 `DEPARTMENT_DB_*` 환경변수는 이 서비스가 소유하는 DB의 기존 운영 이름이며, 호환성을 위해 유지한다.
+- API 명세의 논리 DB명 `assignment_db`와 로컬 Compose의 실제 기본 DB명 `department_db`는 동일 소유 경계를 가리킨다.
+
 ## 빠른 시작
 
 1. 로컬 환경 파일을 만듭니다.

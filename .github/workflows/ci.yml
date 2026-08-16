@@ -54,7 +54,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for service in discovery-service config-service gateway-service user-service complaint-service assignment-service notification-service; do
+          tested=0
+          for service in discovery-service config-service gateway-service complaint-service assignment-service notification-service; do
             if [[ -f "$service/gradlew" ]]; then
               echo "Testing $service"
               (cd "$service" && chmod +x gradlew && ./gradlew test --no-daemon)
