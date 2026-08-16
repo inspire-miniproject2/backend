@@ -531,6 +531,8 @@ Gateway는 외부에서 들어온 동일 이름 헤더를 모두 제거한 뒤 �
 
 ### 12.2 공통 이벤트 envelope 최종안
 
+Kafka topic은 소문자 버전형 이름(예: `complaint.status.changed.v1`)을 사용하고, `eventType`은 PascalCase 비즈니스 이벤트명(예: `ComplaintStatusChanged`)을 사용한다. 두 값은 동일 문자열로 취급하지 않는다.
+
 | 필드 | 타입 | 필수 | 설명 |
 |---|---|---|---|
 | `eventId` | `string` | Y | 전역 유일 이벤트 ID(UUID 권장) |
@@ -759,6 +761,10 @@ Gateway는 외부에서 들어온 동일 이름 헤더를 모두 제거한 뒤 �
 | `RESPONSE.isPublic` 변경 이벤트 | 이번 48시간 범위에서는 발행하지 않는다 |
 | Notification의 `EMAIL` 판단 위치 | `notification-service`가 `notifyChannels`와 사용자 동의를 기준으로 최종 판단한다 |
 | Statistics의 상태 카운트 방식 | 전이 이벤트 기반 증감 방식으로 처리한다 |
+| Kafka topic / eventType | topic은 소문자 버전형, `eventType`은 PascalCase 이벤트명으로 구분한다 |
+| 상태 변경자 필드명 | 이력은 `changedByUserId`, Kafka payload는 `statusChangedByUserId`를 사용한다 |
+| `complaintNo` 형식 | `CIV-{yyyy}-{6자리 순번}`을 사용한다 |
+| datetime 표기 | ISO 8601 Asia/Seoul 오프셋(`+09:00`)을 기준으로 한다 |
 
 ## 14. TASK 6 완료 상태
 

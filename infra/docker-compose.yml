@@ -52,6 +52,7 @@ services:
       - complaint-db-data:/var/lib/mysql
     networks: [g-civil-network]
 
+  # assignment-service 소유 DB. 기존 로컬 호환성을 위해 department-db 이름을 유지한다.
   department-db:
     image: mariadb:11.4
     container_name: g-civil-department-db

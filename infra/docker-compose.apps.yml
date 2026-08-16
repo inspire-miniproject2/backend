@@ -64,6 +64,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     networks: [g-civil-network]
 
+  # assignment-service는 infra의 department-db를 전용 DB로 사용한다.
   assignment-service:
     build:
       context: ../assignment-service

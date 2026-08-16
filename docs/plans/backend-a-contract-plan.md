@@ -47,7 +47,7 @@
 **Dependencies:** None
 
 **Files likely touched:**
-- `docs/backend-a-contract-plan.md`
+- `docs/plans/backend-a-contract-plan.md`
 - `docs/api-spec.md`
 
 **Estimated scope:** S: 1-2 files
@@ -69,7 +69,7 @@
 **Dependencies:** Task 1
 
 **Files likely touched:**
-- `docs/backend-a-contract-plan.md`
+- `docs/plans/backend-a-contract-plan.md`
 - `docs/api-spec.md`
 
 **Estimated scope:** S: 1-2 files
@@ -91,7 +91,7 @@
 **Dependencies:** Task 1, Task 2
 
 **Files likely touched:**
-- `docs/backend-a-contract-plan.md`
+- `docs/plans/backend-a-contract-plan.md`
 - `docs/api-spec.md`
 
 **Estimated scope:** M: 3-5 files
@@ -121,7 +121,7 @@
 **Dependencies:** Task 1
 
 **Files likely touched:**
-- `docs/backend-a-contract-plan.md`
+- `docs/plans/backend-a-contract-plan.md`
 - `docs/api-spec.md`
 
 **Estimated scope:** S: 1-2 files
@@ -143,7 +143,7 @@
 **Dependencies:** Task 2, Task 3, Task 4
 
 **Files likely touched:**
-- `docs/backend-a-contract-plan.md`
+- `docs/plans/backend-a-contract-plan.md`
 - `docs/api-spec.md`
 
 **Estimated scope:** M: 3-5 files
@@ -172,7 +172,7 @@
 **Dependencies:** Task 2, Task 3, Task 5
 
 **Files likely touched:**
-- `docs/backend-a-contract-plan.md`
+- `docs/plans/backend-a-contract-plan.md`
 - `docs/api-spec.md`
 
 **Estimated scope:** S: 1-2 files
@@ -194,7 +194,7 @@
 **Dependencies:** Task 4, Task 5, Task 6
 
 **Files likely touched:**
-- `docs/backend-a-contract-plan.md`
+- `docs/plans/backend-a-contract-plan.md`
 
 **Estimated scope:** S: 1-2 files
 
@@ -227,10 +227,13 @@
 | Kafka 이벤트 payload가 Notification/Statistics 요구를 누락함 | High | Consumer 관점 필수 필드 체크리스트를 별도 검토한다 |
 | 48시간 안에 모든 쟁점 합의가 어려움 | Medium | 구현 차단 이슈와 추후 보완 이슈를 분리해 먼저 동결 가능한 계약부터 확정한다 |
 
-## Open Questions
-| Question | Recommended Owner | Needed By |
+## Decision Status
+
+| Item | Status | Decision / Owner |
 |------|--------|------------|
-| `ASSIGNED` 이벤트와 `STATUS_CHANGED` 이벤트를 분리할지, 하나의 상태 변경 이벤트로 통합할지 | Backend A + Backend B | 2026-08-16 |
-| JWT의 `departmentId`를 토큰에 고정할지, 매 요청 시 사용자 조회로 보완할지 | Backend A | 2026-08-16 |
-| 첨부파일 다운로드 URL을 프록시 방식으로 줄지, 서명 URL 방식으로 줄지 | Backend A | 2026-08-16 |
-| `RESPONSE`의 공개 여부 변경이 별도 이벤트를 발생시켜야 하는지 | Backend A + Backend B | 2026-08-16 |
+| 상태 변경 이벤트 | 확정 | `complaint.status.changed.v1` 하나로 통합 |
+| JWT `departmentId` | 확정 | Access Token 및 Gateway 내부 헤더에 포함 |
+| `RESPONSE.isPublic` 변경 이벤트 | 확정 | 현재 범위에서는 발행하지 않음 |
+| 첨부파일 다운로드 방식 | 미결 | 프록시/서명 URL 중 Backend A가 구현 전 결정 |
+| `user-service` 디렉터리 및 DB 추가 | 미결 | 팀 소유자와 생성 시점 합의 필요 |
+| `statistics-service` 디렉터리 및 DB 추가 | 미결 | 팀 소유자와 생성 시점 합의 필요 |

@@ -354,7 +354,7 @@ API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어
 **Request Example**
 ```text
 multipart/form-data
-- categoryCode: TRAFFIC
+- categoryId: 1
 - title: 어린이보호구역 신호시간 조정 요청
 - content: 출근 시간대 차량 정체로 인해 보행 대기 시간이 과도하게 길어 조정 검토를 요청드립니다.
 - attachmentFiles[0]: 현장사진.jpg
@@ -724,7 +724,7 @@ multipart/form-data
     },
     "content": [
       {
-        "complaintNo": "CIV-184",
+        "complaintNo": "CIV-2026-000184",
         "title": "어린이보호구역 신호시간 조정 요청",
         "assigneeName": "김담당",
         "status": "IN_PROGRESS"
@@ -1055,7 +1055,7 @@ Complaint Service는 민원 접수 후 Assignment Service의 내부 API를 OpenF
 | 필드 | 타입 | 설명 |
 |---|---|---|
 | eventId | string | 전역 유일 이벤트 ID |
-| eventType | string | 이벤트 타입 식별자 |
+| eventType | string | 이벤트 타입 식별자: `ComplaintCreated`, `ComplaintStatusChanged`, `ComplaintResponseRegistered` |
 | eventVersion | string | 스키마 버전, 초기값 `v1` |
 | occurredAt | datetime | 이벤트 발생 시각 |
 | producer | string | 항상 `complaint-service` |
@@ -1096,6 +1096,12 @@ Complaint Service는 민원 접수 후 Assignment Service의 내부 API를 OpenF
 | 중복 방지 | `eventId` 기반 멱등성 보장 |
 | 실패 정책 | 발행/소비 단계 재시도 및 DLQ 처리 |
 | Outbox | 이번 버전 범위에서는 미적용 |
+
+**Canonical naming / format**
+- Kafka topic은 소문자 버전형 이름(`complaint.status.changed.v1`)을 사용하고, envelope의 `eventType`은 PascalCase 비즈니스 이벤트명(`ComplaintStatusChanged`)을 사용합니다.
+- 상태 이력 엔티티의 필드는 `changedByUserId`, Kafka 상태 변경 payload의 필드는 `statusChangedByUserId`로 구분합니다.
+- 외부 노출 민원 번호 형식은 `CIV-{yyyy}-{6자리 순번}`으로 고정합니다. 예: `CIV-2026-000184`.
+- API와 이벤트의 datetime 예시는 ISO 8601 `Asia/Seoul` 오프셋(`+09:00`)을 기준으로 합니다.
 
 ### 8.3 Gateway 인증 정보 전달
 API Gateway에서 외부 인입 요청의 JWT를 검증합니다. Gateway는 외부 헤더를 제거한 후 `X-User-Id`, `X-Login-Id`, `X-User-Role`, `X-Department-Id`, `X-Request-Id`를 생성하여 내부 서비스로 전파합니다. `X-Department-Id`는 값이 없으면 전달하지 않습니다. 각 마이크로서비스는 토큰 재검증 없이 Gateway가 전달한 사용자 메타데이터와 내부 비즈니스 데이터를 결합하여 접근 권한을 판단합니다.

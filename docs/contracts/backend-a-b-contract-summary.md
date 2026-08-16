@@ -79,11 +79,11 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 ```json
 {
   "complaintId": 1001,
-  "complaintNo": "CIVIL-20260815-0001",
+  "complaintNo": "CIV-2026-000184",
   "categoryId": 10,
   "categoryCode": "ROAD",
   "applicantUserId": 501,
-  "submittedAt": "2026-08-15T09:30:00Z"
+  "submittedAt": "2026-08-15T09:30:00+09:00"
 }
 ```
 
@@ -106,7 +106,7 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
   "officerUserId": 9001,
   "officerName": "홍길동",
   "assignmentRuleId": 301,
-  "assignedAt": "2026-08-15T09:30:02Z"
+  "assignedAt": "2026-08-15T09:30:02+09:00"
 }
 ```
 
@@ -115,8 +115,8 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 ```json
 {
   "assignmentFound": false,
-  "reasonCode": "NO_MATCHED_DEPARTMENT",
-  "reasonMessage": "카테고리에 매핑된 활성 부서가 없습니다."
+  "reasonCode": "NO_MATCHING_RULE",
+  "reasonMessage": "활성화된 카테고리-부서 매핑 규칙이 없습니다."
 }
 ```
 
@@ -139,9 +139,9 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 ```json
 {
   "eventId": "uuid",
-  "eventType": "complaint.status.changed.v1",
+  "eventType": "ComplaintStatusChanged",
   "eventVersion": "v1",
-  "occurredAt": "2026-08-15T09:31:00Z",
+  "occurredAt": "2026-08-15T09:31:00+09:00",
   "producer": "complaint-service",
   "partitionKey": "1001",
   "payload": {}
@@ -151,7 +151,7 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 | 필드 | 설명 |
 |---|---|
 | `eventId` | 이벤트 유일 식별자 |
-| `eventType` | 이벤트 이름 |
+| `eventType` | PascalCase 비즈니스 이벤트명. Topic 이름과 구분한다 |
 | `eventVersion` | 스키마 버전 |
 | `occurredAt` | 이벤트 발생 시각 |
 | `producer` | 발행 서비스명 |
@@ -163,12 +163,12 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 ```json
 {
   "complaintId": 1001,
-  "complaintNo": "CIVIL-20260815-0001",
+  "complaintNo": "CIV-2026-000184",
   "applicantUserId": 501,
   "categoryId": 10,
   "categoryCode": "ROAD",
   "currentStatus": "RECEIVED",
-  "submittedAt": "2026-08-15T09:30:00Z",
+  "submittedAt": "2026-08-15T09:30:00+09:00",
   "notifyChannels": [
     "IN_APP",
     "EMAIL"
@@ -181,13 +181,14 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 ```json
 {
   "complaintId": 1001,
-  "complaintNo": "CIVIL-20260815-0001",
+  "complaintNo": "CIV-2026-000184",
   "previousStatus": "RECEIVED",
-  "newStatus": "ASSIGNED",
-  "changedByUserId": null,
-  "departmentId": 21,
-  "officerUserId": 9001,
-  "changedAt": "2026-08-15T09:31:00Z"
+  "currentStatus": "ASSIGNED",
+  "statusChangedByUserId": null,
+  "assignedDepartmentId": 21,
+  "assignedOfficerUserId": 9001,
+  "statusChangedAt": "2026-08-15T09:31:00+09:00",
+  "notifyChannels": ["IN_APP", "EMAIL"]
 }
 ```
 
@@ -196,11 +197,14 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 ```json
 {
   "complaintId": 1001,
-  "complaintNo": "CIVIL-20260815-0001",
+  "complaintNo": "CIV-2026-000184",
   "responseId": 7001,
+  "applicantUserId": 501,
   "responderUserId": 9001,
   "isPublic": true,
-  "respondedAt": "2026-08-15T10:00:00Z"
+  "respondedAt": "2026-08-15T10:00:00+09:00",
+  "assignedDepartmentId": 21,
+  "notifyChannels": ["IN_APP", "EMAIL"]
 }
 ```
 
@@ -213,7 +217,7 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 - 이메일 전송 여부는 `notification-service`가 `notifyChannels` 정책과 사용자 수신 동의를 기준으로 판단한다.
 - `statistics-service`는 상태 전이 이벤트를 기준으로 건수 증감 처리한다.
 - Kafka key는 `complaintId` 문자열을 사용한다.
-- 자동 처리인 경우 `changedByUserId`는 `null` 허용이다.
+- 자동 처리인 경우 상태 이력의 `changedByUserId`와 이벤트의 `statusChangedByUserId`는 `null` 허용이다.
 
 ## 5. COMPLETED 전 RESPONSE 필수 규칙
 
@@ -244,7 +248,9 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 | 별도 `ASSIGNMENT` 테이블 | 생성하지 않음 |
 | `complaintNo` | 유지 |
 | `departmentId` | JWT payload 및 내부 헤더에 포함 |
-| `changedByUserId` | 자동 상태 전이에서 `null` 허용 |
+| 상태 변경자 naming | 이력은 `changedByUserId`, Kafka payload는 `statusChangedByUserId` |
+| `complaintNo` 형식 | `CIV-{yyyy}-{6자리 순번}` |
+| datetime 표기 | ISO 8601 Asia/Seoul 오프셋(`+09:00`) |
 
 ## 7. 현재 시점 메모
 
