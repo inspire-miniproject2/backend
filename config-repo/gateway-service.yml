@@ -1,23 +1,33 @@
 spring:
   cloud:
     gateway:
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/auth/**,/api/users/**
-        - id: complaint-service
-          uri: lb://complaint-service
-          predicates:
-            - Path=/api/complaints/**
-        - id: assignment-service
-          uri: lb://assignment-service
-          predicates:
-            - Path=/api/assignments/**,/api/departments/**
-        - id: notification-service
-          uri: lb://notification-service
-          predicates:
-            - Path=/api/notifications/**
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/v1/auth/**,/api/v1/users/**
+            - id: complaint-service
+              uri: lb://complaint-service
+              predicates:
+                - Path=/api/v1/complaints/**,/api/v1/public-responses/**,/api/v1/officer/complaints/**
+            - id: assignment-service
+              uri: lb://assignment-service
+              predicates:
+                - Path=/api/v1/assignments/**,/api/v1/departments/**,/api/v1/complaint-categories/**
+            - id: notification-service
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/v1/notifications/**
+            - id: statistics-service
+              uri: lb://statistics-service
+              predicates:
+                - Path=/api/v1/admin/statistics/**
+
+eureka:
+  client:
+    registry-fetch-interval-seconds: 5
 
 jwt:
   secret: ${JWT_SECRET}

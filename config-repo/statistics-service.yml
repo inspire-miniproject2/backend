@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+
+management:
+  info:
+    env:
+      enabled: true
+
+info:
+  service:
+    name: statistics-service

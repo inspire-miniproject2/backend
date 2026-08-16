@@ -14,14 +14,17 @@
 - [x] 컨테이너 이미지 발행을 필요한 서비스만 선택하는 수동 실행으로 경량화
 - [x] 커밋 규칙과 PR 템플릿 구성
 
-## 백엔드 소스가 들어오면
+## MSA 실행 골격 완료
 
-- [ ] CI 트리거를 Pull Request와 `develop` Push 자동 실행으로 전환
-- [ ] 모든 서비스 `./gradlew test` 통과
+- [x] CI 트리거를 Pull Request와 `develop` Push 자동 실행으로 전환
+- [x] 모든 서비스 `./gradlew test` 통과
+- [x] Config Server 설정 조회 확인
+- [x] Eureka에 Complaint, Assignment, Notification, Statistics 등록 확인
+- [x] Gateway를 통한 Complaint, Notification, Statistics `/ping` 접근 확인
+
+## 비즈니스 소스가 들어오면
+
 - [ ] 모든 서비스 Docker 이미지 빌드
-- [ ] Config Server 설정 조회 확인
-- [ ] Eureka에 5개 애플리케이션 서비스 등록 확인
-- [ ] Gateway를 통한 API 접근 확인
 - [ ] Complaint → Assignment OpenFeign 성공·실패 확인
 - [ ] 상태 변경 이벤트 발행·알림 저장 확인
 - [ ] 특정 서비스 중단 후 나머지 서비스 장애 격리 확인

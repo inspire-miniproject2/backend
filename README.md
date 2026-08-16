@@ -8,13 +8,13 @@
 
 - JDK 17
 - Gradle Wrapper
-- Spring Boot 3.x / Spring Cloud 호환 버전
+- Spring Boot 3.5.15 / Spring Cloud 2025.0.3
 - MariaDB 11.4
 - Apache Kafka 3.9.1 (KRaft, 단일 노드 개발 환경)
 - Docker Compose v2
 - 시간대: `Asia/Seoul`
 
-Spring Boot와 Spring Cloud의 정확한 버전 조합은 백엔드 담당자가 프로젝트를 생성할 때 한 번에 통일해야 합니다.
+모든 서비스는 JDK 17 toolchain과 동일한 Spring Boot/Spring Cloud 조합을 사용합니다.
 
 ## 디렉터리
 
@@ -27,6 +27,7 @@ g-civil-msa/
 ├── complaint-service/       # 민원 접수·처리
 ├── assignment-service/      # 부서·민원 배정
 ├── notification-service/    # Kafka 기반 알림
+├── statistics-service/      # Kafka 기반 통계 집계
 ├── config-repo/             # 공통/서비스별 local·dev 설정
 ├── docs/                    # Kafka 규격·DevOps TODO
 ├── infra/                   # Docker Compose
@@ -36,9 +37,8 @@ g-civil-msa/
 
 ## 현재 구현 상태와 확장 합의
 
-- 현재 추적 중인 6개 서비스 디렉터리는 `README.md`, `Dockerfile`, `.dockerignore`만 있는 구현 전 골격이다.
-- 계약상 필요한 `user-service`와 `statistics-service`는 아직 저장소에 없다. 담당자와 생성 시점을 합의한 뒤 기존 루트 구조에 추가한다.
-- 두 서비스가 추가되기 전까지 Compose와 CI에 존재하지 않는 build context를 임의로 선언하지 않는다.
+- Config, Eureka, Gateway와 각 마이크로서비스에는 실행 가능한 Spring Boot 최소 골격과 Actuator health endpoint가 포함되어 있습니다.
+- 각 도메인 서비스의 `/ping` endpoint는 Eureka 등록과 Gateway 라우팅 검증용이며 비즈니스 API 구현과 분리됩니다.
 - 계약의 표준 서비스명은 `assignment-service`다. 로컬 인프라의 `department-db`와 `DEPARTMENT_DB_*` 환경변수는 이 서비스가 소유하는 DB의 기존 운영 이름이며, 호환성을 위해 유지한다.
 - API 명세의 논리 DB명 `assignment_db`와 로컬 Compose의 실제 기본 DB명 `department_db`는 동일 소유 경계를 가리킨다.
 
@@ -68,6 +68,20 @@ cp .env.example .env
 ./scripts/health-check.sh --strict
 ```
 
+Strict 검사는 다음 MSA 체크포인트를 함께 확인합니다.
+
+- Config Server, Eureka Server, API Gateway 및 각 서비스의 Actuator health
+- Complaint, Assignment, Notification, Statistics의 Eureka 등록
+- Gateway에서 Complaint, Notification, Statistics로 전달되는 `/ping` 라우트
+
+검증용 라우트는 다음과 같습니다.
+
+```text
+GET /api/v1/complaints/ping
+GET /api/v1/notifications/ping
+GET /api/v1/admin/statistics/ping
+```
+
 4. 인프라를 종료합니다.
 
 ```bash
@@ -86,6 +100,7 @@ cp .env.example .env
 |---|---:|---|
 | API Gateway | 8080 | `gateway-service:8080` |
 | User | 8084 | `user-service:8084` |
+| Statistics | 8085 | `statistics-service:8085` |
 | Complaint | 8081 | `complaint-service:8081` |
 | Assignment | 8082 | `assignment-service:8082` |
 | Notification | 8083 | `notification-service:8083` |
@@ -96,6 +111,7 @@ cp .env.example .env
 | Complaint DB | 3307 | `complaint-db:3306` |
 | Assignment DB | 3308 | `assignment-db:3306` |
 | Notification DB | 3309 | `notification-db:3306` |
+| Statistics DB | 3311 | `statistics-db:3306` |
 
 호스트 포트는 로컬 PC의 `127.0.0.1`에만 바인딩됩니다. 컨테이너 사이에서는 `localhost` 대신 위의 서비스 이름을 사용합니다.
 
@@ -158,4 +174,4 @@ settings.gradle (또는 settings.gradle.kts)
 src/
 ```
 
-각 서비스는 Actuator를 추가하고 `/actuator/health`를 노출해야 합니다.
+각 서비스는 Actuator를 추가하고 `/actuator/health`를 노출합니다. 현재 최소 골격의 `/ping` API는 MSA 연결 검증용이며 담당자의 비즈니스 API 구현을 대체하지 않습니다.

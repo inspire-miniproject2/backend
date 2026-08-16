@@ -5,7 +5,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$PROJECT_DIR/.env"
 INFRA_FILE="$PROJECT_DIR/infra/docker-compose.yml"
 APPS_FILE="$PROJECT_DIR/infra/docker-compose.apps.yml"
-SERVICES=(config-service discovery-service gateway-service user-service complaint-service assignment-service notification-service)
+SERVICES=(config-service discovery-service gateway-service user-service complaint-service assignment-service notification-service statistics-service)
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "Missing $ENV_FILE"
