@@ -1,0 +1,79 @@
+name: Container Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to build and publish
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - config-service
+          - discovery-service
+          - gateway-service
+          - user-service
+          - complaint-service
+          - assignment-service
+          - notification-service
+
+concurrency:
+  group: container-images
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish selected services
+        env:
+          SELECTED_SERVICE: ${{ inputs.service }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          all_services=(
+            config-service discovery-service gateway-service user-service
+            complaint-service assignment-service notification-service
+          )
+
+          if [[ "$SELECTED_SERVICE" == "all" ]]; then
+            services=("${all_services[@]}")
+          else
+            services=("$SELECTED_SERVICE")
+          fi
+
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          short_sha="${GITHUB_SHA::7}"
+          published=0
+
+          for service in "${services[@]}"; do
+            if [[ ! -f "$service/gradlew" ]]; then
+              echo "Skipping $service: Spring Boot source is not available."
+              continue
+            fi
+
+            image="ghcr.io/$owner/$service"
+            docker build --tag "$image:$short_sha" --tag "$image:latest" "$service"
+            docker push "$image:$short_sha"
+            docker push "$image:latest"
+            published=1
+          done
+
+          if [[ "$published" -eq 0 ]]; then
+            echo "No container image was published."
+          fi
+

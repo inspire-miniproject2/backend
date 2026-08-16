@@ -4,10 +4,18 @@ services:
       context: ../config-service
     restart: unless-stopped
     ports:
-      - "${CONFIG_PORT:-8888}:8888"
+      - "127.0.0.1:${CONFIG_PORT:-8888}:8888"
     environment:
       TZ: ${TZ:-Asia/Seoul}
       SERVER_PORT: 8888
+      SPRING_APPLICATION_NAME: config-service
+      SPRING_PROFILES_ACTIVE: native
+      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      KAFKA_COMPLAINT_STATUS_TOPIC: ${KAFKA_COMPLAINT_STATUS_TOPIC:-complaint-status-changed.v1}
+      KAFKA_COMPLAINT_STATUS_DLT: ${KAFKA_COMPLAINT_STATUS_DLT:-complaint-status-changed.v1.dlt}
+    volumes:
+      - ../config-repo:/config:ro
     networks: [g-civil-network]
 
   discovery-service:
@@ -17,10 +25,12 @@ services:
     depends_on:
       - config-service
     ports:
-      - "${DISCOVERY_PORT:-8761}:8761"
+      - "127.0.0.1:${DISCOVERY_PORT:-8761}:8761"
     environment:
       TZ: ${TZ:-Asia/Seoul}
       SERVER_PORT: 8761
+      SPRING_APPLICATION_NAME: discovery-service
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
     networks: [g-civil-network]
 
@@ -32,12 +42,39 @@ services:
       - config-service
       - discovery-service
     ports:
-      - "${GATEWAY_PORT:-8080}:8080"
+      - "127.0.0.1:${GATEWAY_PORT:-8080}:8080"
     environment:
       TZ: ${TZ:-Asia/Seoul}
       SERVER_PORT: 8080
+      SPRING_APPLICATION_NAME: gateway-service
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+    networks: [g-civil-network]
+
+  user-service:
+    build:
+      context: ../user-service
+    restart: unless-stopped
+    depends_on:
+      user-db:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    ports:
+      - "127.0.0.1:${USER_PORT:-8084}:8084"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      SERVER_PORT: 8084
+      SPRING_APPLICATION_NAME: user-service
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mariadb://user-db:3306/${USER_DB_NAME:-user_db}
+      SPRING_DATASOURCE_USERNAME: ${USER_DB_USER:-user}
+      SPRING_DATASOURCE_PASSWORD: ${USER_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     networks: [g-civil-network]
 
   complaint-service:
@@ -52,38 +89,44 @@ services:
       discovery-service:
         condition: service_started
     ports:
-      - "${COMPLAINT_PORT:-8081}:8081"
+      - "127.0.0.1:${COMPLAINT_PORT:-8081}:8081"
     environment:
       TZ: ${TZ:-Asia/Seoul}
       SERVER_PORT: 8081
+      SPRING_APPLICATION_NAME: complaint-service
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:mariadb://complaint-db:3306/${COMPLAINT_DB_NAME:-complaint_db}
       SPRING_DATASOURCE_USERNAME: ${COMPLAINT_DB_USER:-complaint}
       SPRING_DATASOURCE_PASSWORD: ${COMPLAINT_DB_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_COMPLAINT_STATUS_TOPIC: ${KAFKA_COMPLAINT_STATUS_TOPIC:-complaint-status-changed.v1}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     networks: [g-civil-network]
 
-  # assignment-service는 infra의 department-db를 전용 DB로 사용한다.
   assignment-service:
     build:
       context: ../assignment-service
     restart: unless-stopped
     depends_on:
-      department-db:
+      assignment-db:
         condition: service_healthy
       discovery-service:
         condition: service_started
     ports:
-      - "${DEPARTMENT_PORT:-8082}:8082"
+      - "127.0.0.1:${ASSIGNMENT_PORT:-8082}:8082"
     environment:
       TZ: ${TZ:-Asia/Seoul}
       SERVER_PORT: 8082
+      SPRING_APPLICATION_NAME: assignment-service
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      SPRING_DATASOURCE_URL: jdbc:mariadb://department-db:3306/${DEPARTMENT_DB_NAME:-department_db}
-      SPRING_DATASOURCE_USERNAME: ${DEPARTMENT_DB_USER:-department}
-      SPRING_DATASOURCE_PASSWORD: ${DEPARTMENT_DB_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mariadb://assignment-db:3306/${ASSIGNMENT_DB_NAME:-assignment_db}
+      SPRING_DATASOURCE_USERNAME: ${ASSIGNMENT_DB_USER:-assignment}
+      SPRING_DATASOURCE_PASSWORD: ${ASSIGNMENT_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     networks: [g-civil-network]
 
   notification-service:
@@ -98,14 +141,19 @@ services:
       discovery-service:
         condition: service_started
     ports:
-      - "${NOTIFICATION_PORT:-8083}:8083"
+      - "127.0.0.1:${NOTIFICATION_PORT:-8083}:8083"
     environment:
       TZ: ${TZ:-Asia/Seoul}
       SERVER_PORT: 8083
+      SPRING_APPLICATION_NAME: notification-service
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:mariadb://notification-db:3306/${NOTIFICATION_DB_NAME:-notification_db}
       SPRING_DATASOURCE_USERNAME: ${NOTIFICATION_DB_USER:-notification}
       SPRING_DATASOURCE_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_COMPLAINT_STATUS_TOPIC: ${KAFKA_COMPLAINT_STATUS_TOPIC:-complaint-status-changed.v1}
+      KAFKA_COMPLAINT_STATUS_DLT: ${KAFKA_COMPLAINT_STATUS_DLT:-complaint-status-changed.v1.dlt}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     networks: [g-civil-network]
