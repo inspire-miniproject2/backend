@@ -51,6 +51,8 @@ Gateway와 User Service는 같은 `JWT_SECRET`을 사용해야 합니다. 공유
 | `KAFKA_COMPLAINT_CREATED_DLT` | `complaint.created.v1.dlt` | N | 민원 생성 DLT |
 | `KAFKA_COMPLAINT_STATUS_TOPIC` | `complaint.status.changed.v1` | N | 상태 변경 이벤트 Topic |
 | `KAFKA_COMPLAINT_STATUS_DLT` | `complaint.status.changed.v1.dlt` | N | 상태 변경 DLT |
+| `KAFKA_COMPLAINT_RESPONSE_TOPIC` | `complaint.response.registered.v1` | N | 공식 답변 등록 이벤트 Topic |
+| `KAFKA_COMPLAINT_RESPONSE_DLT` | `complaint.response.registered.v1.dlt` | N | 공식 답변 등록 DLT |
 | `NOTIFICATION_KAFKA_GROUP_ID` | `notification-service` | N | Notification Consumer Group |
 | `STATISTICS_KAFKA_GROUP_ID` | `statistics-service` | N | Statistics Consumer Group 예약값 |
 
@@ -58,13 +60,13 @@ Gateway와 User Service는 같은 `JWT_SECRET`을 사용해야 합니다. 공유
 
 ## 데이터베이스
 
-각 서비스는 `<SERVICE>_DB_NAME`, `<SERVICE>_DB_USER`, `<SERVICE>_DB_PASSWORD`, `<SERVICE>_DB_ROOT_PASSWORD`, `<SERVICE>_DB_HOST_PORT` 형식을 사용합니다.
+각 서비스는 `<SERVICE>_DB_NAME`, `<SERVICE>_DB_USER`, `<SERVICE>_DB_PASSWORD`, `<SERVICE>_DB_ROOT_PASSWORD`, `<SERVICE>_DB_HOST_PORT` 형식을 사용합니다. Assignment Service의 로컬 DB는 기존 팀 계약과의 호환성을 위해 `DEPARTMENT_DB_*` 이름을 유지합니다.
 
 | 서비스 | DB 이름 기본값 | 호스트 포트 | 컨테이너 주소 |
 |---|---|---:|---|
 | User | `user_db` | `3310` | `user-db:3306` |
 | Complaint | `complaint_db` | `3307` | `complaint-db:3306` |
-| Assignment | `assignment_db` | `3308` | `assignment-db:3306` |
+| Assignment(로컬 이름 Department) | `department_db` | `3308` | `department-db:3306` |
 | Notification | `notification_db` | `3309` | `notification-db:3306` |
 | Statistics(예약) | `statistics_db` | `3311` | `statistics-db:3306` |
 

@@ -36,9 +36,9 @@ g-civil-msa/
 
 ## 현재 구현 상태와 확장 합의
 
-- 현재 추적 중인 6개 서비스 디렉터리는 `README.md`, `Dockerfile`, `.dockerignore`만 있는 구현 전 골격이다.
-- 계약상 필요한 `user-service`와 `statistics-service`는 아직 저장소에 없다. 담당자와 생성 시점을 합의한 뒤 기존 루트 구조에 추가한다.
-- 두 서비스가 추가되기 전까지 Compose와 CI에 존재하지 않는 build context를 임의로 선언하지 않는다.
+- 현재 추적 중인 7개 서비스 디렉터리는 `README.md`, `Dockerfile`, `.dockerignore`만 있는 구현 전 골격이다.
+- `user-service` 골격은 준비되어 있고 `statistics-service`는 아직 저장소에 없다. Statistics 담당자와 생성 시점을 합의한 뒤 기존 루트 구조에 추가한다.
+- Statistics Service가 추가되기 전까지 Compose와 CI에 존재하지 않는 build context를 임의로 선언하지 않는다.
 - 계약의 표준 서비스명은 `assignment-service`다. 로컬 인프라의 `department-db`와 `DEPARTMENT_DB_*` 환경변수는 이 서비스가 소유하는 DB의 기존 운영 이름이며, 호환성을 위해 유지한다.
 - API 명세의 논리 DB명 `assignment_db`와 로컬 Compose의 실제 기본 DB명 `department_db`는 동일 소유 경계를 가리킨다.
 
@@ -94,7 +94,7 @@ cp .env.example .env
 | Kafka | 9092 | `kafka:29092` |
 | User DB | 3310 | `user-db:3306` |
 | Complaint DB | 3307 | `complaint-db:3306` |
-| Assignment DB | 3308 | `assignment-db:3306` |
+| Assignment DB(로컬 이름 Department DB) | 3308 | `department-db:3306` |
 | Notification DB | 3309 | `notification-db:3306` |
 
 호스트 포트는 로컬 PC의 `127.0.0.1`에만 바인딩됩니다. 컨테이너 사이에서는 `localhost` 대신 위의 서비스 이름을 사용합니다.
@@ -110,7 +110,7 @@ Kafka Topic을 확인하려면 다음 명령을 사용합니다.
 - User Service는 사용자와 Role을 소유하고 JWT를 발급합니다.
 - Gateway가 JWT를 검증하고 외부 요청의 단일 진입점 역할을 합니다.
 - Complaint Service는 Assignment Service를 OpenFeign으로 호출합니다.
-- 민원 생성과 상태 변경 저장이 성공한 뒤 `complaint.created.v1`, `complaint.status.changed.v1` 이벤트를 발행합니다.
+- 민원 생성, 상태 변경, 공식 답변 저장이 성공한 뒤 `complaint.created.v1`, `complaint.status.changed.v1`, `complaint.response.registered.v1` 이벤트를 발행합니다.
 - Notification Service는 이벤트를 소비하고 자체 DB에 알림을 저장합니다.
 - 서비스는 다른 서비스의 DB를 직접 조회하거나 Foreign Key로 연결하지 않습니다.
 - 서비스 간 관계는 `userId`, `complaintId`, `departmentId`만 공유합니다.
@@ -129,6 +129,7 @@ Compose는 각 서비스에 다음 설정을 전달합니다.
 - `JWT_ACCESS_TOKEN_EXPIRATION_MS`, `JWT_REFRESH_TOKEN_EXPIRATION_MS`: 토큰 만료시간(ms)
 - `KAFKA_COMPLAINT_CREATED_TOPIC`: 민원 생성 Topic
 - `KAFKA_COMPLAINT_STATUS_TOPIC`: 민원 상태 변경 Topic
+- `KAFKA_COMPLAINT_RESPONSE_TOPIC`: 민원 공식 답변 등록 Topic
 - `NOTIFICATION_KAFKA_GROUP_ID`: 알림 Consumer Group
 - `FILE_STORAGE_TYPE`: 첨부파일 저장 방식(`local` 또는 `s3`)
 - `LOCAL_STORAGE_PATH`, `AWS_REGION`, `S3_ATTACHMENT_BUCKET`: 첨부파일 저장소 설정

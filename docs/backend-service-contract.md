@@ -42,7 +42,7 @@ spring:
 
 - `user-service` → `user-db`
 - `complaint-service` → `complaint-db`
-- `assignment-service` → `assignment-db`
+- `assignment-service` → `department-db`(로컬 컨테이너명, 논리 DB명은 `assignment_db`)
 - `notification-service` → `notification-db`
 
 다른 서비스의 DB, Entity 또는 Repository를 직접 참조하지 않습니다. 서비스 간에는 DTO와 식별값만 전달합니다.
@@ -55,4 +55,3 @@ spring:
 - 허용되지 않은 민원 상태 전이를 거부합니다.
 - Complaint DB 변경이 성공한 후에만 Kafka 이벤트를 발행합니다.
 - OpenFeign 실패와 Kafka 중복 소비에 대한 처리 기준이 있습니다.
-
