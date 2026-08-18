@@ -12,8 +12,12 @@ services:
       SPRING_PROFILES_ACTIVE: native
       SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
-      KAFKA_COMPLAINT_STATUS_TOPIC: ${KAFKA_COMPLAINT_STATUS_TOPIC:-complaint-status-changed.v1}
-      KAFKA_COMPLAINT_STATUS_DLT: ${KAFKA_COMPLAINT_STATUS_DLT:-complaint-status-changed.v1.dlt}
+      KAFKA_COMPLAINT_CREATED_TOPIC: ${KAFKA_COMPLAINT_CREATED_TOPIC:-complaint.created.v1}
+      KAFKA_COMPLAINT_CREATED_DLT: ${KAFKA_COMPLAINT_CREATED_DLT:-complaint.created.v1.dlt}
+      KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC: ${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC:-complaint.status.changed.v1}
+      KAFKA_COMPLAINT_STATUS_CHANGED_DLT: ${KAFKA_COMPLAINT_STATUS_CHANGED_DLT:-complaint.status.changed.v1.dlt}
+      KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC:-complaint.response.registered.v1}
+      KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT:-complaint.response.registered.v1.dlt}
     volumes:
       - ../config-repo:/config:ro
     healthcheck:
@@ -120,7 +124,9 @@ services:
       SPRING_DATASOURCE_USERNAME: ${COMPLAINT_DB_USER:-complaint}
       SPRING_DATASOURCE_PASSWORD: ${COMPLAINT_DB_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      KAFKA_COMPLAINT_STATUS_TOPIC: ${KAFKA_COMPLAINT_STATUS_TOPIC:-complaint-status-changed.v1}
+      KAFKA_COMPLAINT_CREATED_TOPIC: ${KAFKA_COMPLAINT_CREATED_TOPIC:-complaint.created.v1}
+      KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC: ${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC:-complaint.status.changed.v1}
+      KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC:-complaint.response.registered.v1}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     networks: [g-civil-network]
 
@@ -174,8 +180,10 @@ services:
       SPRING_DATASOURCE_USERNAME: ${NOTIFICATION_DB_USER:-notification}
       SPRING_DATASOURCE_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      KAFKA_COMPLAINT_STATUS_TOPIC: ${KAFKA_COMPLAINT_STATUS_TOPIC:-complaint-status-changed.v1}
-      KAFKA_COMPLAINT_STATUS_DLT: ${KAFKA_COMPLAINT_STATUS_DLT:-complaint-status-changed.v1.dlt}
+      KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC: ${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC:-complaint.status.changed.v1}
+      KAFKA_COMPLAINT_STATUS_CHANGED_DLT: ${KAFKA_COMPLAINT_STATUS_CHANGED_DLT:-complaint.status.changed.v1.dlt}
+      KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC:-complaint.response.registered.v1}
+      KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT:-complaint.response.registered.v1.dlt}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     networks: [g-civil-network]
 
@@ -185,6 +193,8 @@ services:
     restart: unless-stopped
     depends_on:
       statistics-db:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
       discovery-service:
         condition: service_healthy
@@ -201,4 +211,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mariadb://statistics-db:3306/${STATISTICS_DB_NAME:-statistics_db}
       SPRING_DATASOURCE_USERNAME: ${STATISTICS_DB_USER:-statistics}
       SPRING_DATASOURCE_PASSWORD: ${STATISTICS_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_COMPLAINT_CREATED_TOPIC: ${KAFKA_COMPLAINT_CREATED_TOPIC:-complaint.created.v1}
+      KAFKA_COMPLAINT_CREATED_DLT: ${KAFKA_COMPLAINT_CREATED_DLT:-complaint.created.v1.dlt}
+      KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC: ${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC:-complaint.status.changed.v1}
+      KAFKA_COMPLAINT_STATUS_CHANGED_DLT: ${KAFKA_COMPLAINT_STATUS_CHANGED_DLT:-complaint.status.changed.v1.dlt}
     networks: [g-civil-network]

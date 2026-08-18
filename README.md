@@ -50,7 +50,7 @@ g-civil-msa/
 cp .env.example .env
 ```
 
-2. Kafka와 서비스별 DB를 실행합니다. 상태 변경 Topic과 DLT도 자동으로 생성됩니다.
+2. Kafka와 서비스별 DB를 실행합니다. 확정된 세 이벤트 Topic과 각 DLT도 자동으로 생성됩니다.
 
 ```bash
 ./scripts/start-infra.sh
@@ -126,7 +126,7 @@ Kafka Topic을 확인하려면 다음 명령을 사용합니다.
 - User Service는 사용자와 Role을 소유하고 JWT를 발급합니다.
 - Gateway가 JWT를 검증하고 외부 요청의 단일 진입점 역할을 합니다.
 - Complaint Service는 Assignment Service를 OpenFeign으로 호출합니다.
-- 상태 변경 저장이 성공한 뒤 `complaint-status-changed.v1` 이벤트를 발행합니다.
+- Complaint Service는 DB commit 이후 `complaint.created.v1`, `complaint.status.changed.v1`, `complaint.response.registered.v1` 이벤트를 발행합니다.
 - Notification Service는 이벤트를 소비하고 자체 DB에 알림을 저장합니다.
 - 서비스는 다른 서비스의 DB를 직접 조회하거나 Foreign Key로 연결하지 않습니다.
 - 서비스 간 관계는 `userId`, `complaintId`, `departmentId`만 공유합니다.
@@ -142,7 +142,10 @@ Compose는 각 서비스에 다음 설정을 전달합니다.
 - `SPRING_KAFKA_BOOTSTRAP_SERVERS`: Kafka 내부 주소
 - `SERVER_PORT`: 서비스 포트
 - `JWT_SECRET`: JWT 서명 키
-- `KAFKA_COMPLAINT_STATUS_TOPIC`: 민원 상태 변경 Topic
+- `KAFKA_COMPLAINT_CREATED_TOPIC`: 민원 생성 Topic
+- `KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC`: 민원 상태 변경 Topic
+- `KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC`: 민원 답변 등록 Topic
+- 각 Topic의 실패 메시지용 환경변수는 같은 접두사에 `_DLT`를 사용합니다.
 
 Config Server는 [config-repo](config-repo)의 설정을 읽습니다. 서비스별 최소 `application.yml`에서는 애플리케이션 이름과 Config Server 연결만 지정하고, 비밀번호나 Secret을 저장하지 않습니다.
 
