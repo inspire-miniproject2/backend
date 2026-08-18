@@ -58,113 +58,113 @@ services:
     networks: [g-civil-network]
 
   user-db:
-    image: mariadb:11.4
+    image: mysql:8.4
     container_name: g-civil-user-db
     restart: unless-stopped
     ports:
       - "127.0.0.1:${USER_DB_HOST_PORT:-3310}:3306"
     environment:
       TZ: ${TZ:-Asia/Seoul}
-      MARIADB_DATABASE: ${USER_DB_NAME:-user_db}
-      MARIADB_USER: ${USER_DB_USER:-user}
-      MARIADB_PASSWORD: ${USER_DB_PASSWORD:?set USER_DB_PASSWORD in .env}
-      MARIADB_ROOT_PASSWORD: ${USER_DB_ROOT_PASSWORD:?set USER_DB_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${USER_DB_NAME:-user_db}
+      MYSQL_USER: ${USER_DB_USER:-user}
+      MYSQL_PASSWORD: ${USER_DB_PASSWORD:?set USER_DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${USER_DB_ROOT_PASSWORD:?set USER_DB_ROOT_PASSWORD in .env}
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
     volumes:
-      - user-db-data:/var/lib/mysql
+      - user-mysql-data:/var/lib/mysql
     networks: [g-civil-network]
 
   complaint-db:
-    image: mariadb:11.4
+    image: mysql:8.4
     container_name: g-civil-complaint-db
     restart: unless-stopped
     ports:
       - "127.0.0.1:${COMPLAINT_DB_HOST_PORT:-3307}:3306"
     environment:
       TZ: ${TZ:-Asia/Seoul}
-      MARIADB_DATABASE: ${COMPLAINT_DB_NAME:-complaint_db}
-      MARIADB_USER: ${COMPLAINT_DB_USER:-complaint}
-      MARIADB_PASSWORD: ${COMPLAINT_DB_PASSWORD:?set COMPLAINT_DB_PASSWORD in .env}
-      MARIADB_ROOT_PASSWORD: ${COMPLAINT_DB_ROOT_PASSWORD:?set COMPLAINT_DB_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${COMPLAINT_DB_NAME:-complaint_db}
+      MYSQL_USER: ${COMPLAINT_DB_USER:-complaint}
+      MYSQL_PASSWORD: ${COMPLAINT_DB_PASSWORD:?set COMPLAINT_DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${COMPLAINT_DB_ROOT_PASSWORD:?set COMPLAINT_DB_ROOT_PASSWORD in .env}
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
     volumes:
-      - complaint-db-data:/var/lib/mysql
+      - complaint-mysql-data:/var/lib/mysql
     networks: [g-civil-network]
 
   assignment-db:
-    image: mariadb:11.4
+    image: mysql:8.4
     container_name: g-civil-assignment-db
     restart: unless-stopped
     ports:
       - "127.0.0.1:${ASSIGNMENT_DB_HOST_PORT:-3308}:3306"
     environment:
       TZ: ${TZ:-Asia/Seoul}
-      MARIADB_DATABASE: ${ASSIGNMENT_DB_NAME:-assignment_db}
-      MARIADB_USER: ${ASSIGNMENT_DB_USER:-assignment}
-      MARIADB_PASSWORD: ${ASSIGNMENT_DB_PASSWORD:?set ASSIGNMENT_DB_PASSWORD in .env}
-      MARIADB_ROOT_PASSWORD: ${ASSIGNMENT_DB_ROOT_PASSWORD:?set ASSIGNMENT_DB_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${ASSIGNMENT_DB_NAME:-assignment_db}
+      MYSQL_USER: ${ASSIGNMENT_DB_USER:-assignment}
+      MYSQL_PASSWORD: ${ASSIGNMENT_DB_PASSWORD:?set ASSIGNMENT_DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${ASSIGNMENT_DB_ROOT_PASSWORD:?set ASSIGNMENT_DB_ROOT_PASSWORD in .env}
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
     volumes:
-      - assignment-db-data:/var/lib/mysql
+      - assignment-mysql-data:/var/lib/mysql
     networks: [g-civil-network]
 
   notification-db:
-    image: mariadb:11.4
+    image: mysql:8.4
     container_name: g-civil-notification-db
     restart: unless-stopped
     ports:
       - "127.0.0.1:${NOTIFICATION_DB_HOST_PORT:-3309}:3306"
     environment:
       TZ: ${TZ:-Asia/Seoul}
-      MARIADB_DATABASE: ${NOTIFICATION_DB_NAME:-notification_db}
-      MARIADB_USER: ${NOTIFICATION_DB_USER:-notification}
-      MARIADB_PASSWORD: ${NOTIFICATION_DB_PASSWORD:?set NOTIFICATION_DB_PASSWORD in .env}
-      MARIADB_ROOT_PASSWORD: ${NOTIFICATION_DB_ROOT_PASSWORD:?set NOTIFICATION_DB_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${NOTIFICATION_DB_NAME:-notification_db}
+      MYSQL_USER: ${NOTIFICATION_DB_USER:-notification}
+      MYSQL_PASSWORD: ${NOTIFICATION_DB_PASSWORD:?set NOTIFICATION_DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${NOTIFICATION_DB_ROOT_PASSWORD:?set NOTIFICATION_DB_ROOT_PASSWORD in .env}
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
     volumes:
-      - notification-db-data:/var/lib/mysql
+      - notification-mysql-data:/var/lib/mysql
     networks: [g-civil-network]
 
   statistics-db:
-    image: mariadb:11.4
+    image: mysql:8.4
     container_name: g-civil-statistics-db
     restart: unless-stopped
     ports:
       - "127.0.0.1:${STATISTICS_DB_HOST_PORT:-3311}:3306"
     environment:
       TZ: ${TZ:-Asia/Seoul}
-      MARIADB_DATABASE: ${STATISTICS_DB_NAME:-statistics_db}
-      MARIADB_USER: ${STATISTICS_DB_USER:-statistics}
-      MARIADB_PASSWORD: ${STATISTICS_DB_PASSWORD:?set STATISTICS_DB_PASSWORD in .env}
-      MARIADB_ROOT_PASSWORD: ${STATISTICS_DB_ROOT_PASSWORD:?set STATISTICS_DB_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${STATISTICS_DB_NAME:-statistics_db}
+      MYSQL_USER: ${STATISTICS_DB_USER:-statistics}
+      MYSQL_PASSWORD: ${STATISTICS_DB_PASSWORD:?set STATISTICS_DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${STATISTICS_DB_ROOT_PASSWORD:?set STATISTICS_DB_ROOT_PASSWORD in .env}
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
     volumes:
-      - statistics-db-data:/var/lib/mysql
+      - statistics-mysql-data:/var/lib/mysql
     networks: [g-civil-network]
 
 networks:
@@ -173,8 +173,8 @@ networks:
 
 volumes:
   kafka-data:
-  user-db-data:
-  complaint-db-data:
-  assignment-db-data:
-  notification-db-data:
-  statistics-db-data:
+  user-mysql-data:
+  complaint-mysql-data:
+  assignment-mysql-data:
+  notification-mysql-data:
+  statistics-mysql-data:
