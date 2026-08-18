@@ -2,6 +2,7 @@ package com.gcivil.statistics.event;
 
 import com.gcivil.statistics.domain.ComplaintStatisticSource;
 import com.gcivil.statistics.domain.StatisticsAggregationRepository;
+import com.gcivil.statistics.domain.ProcessedEventRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -17,7 +18,8 @@ import static org.mockito.Mockito.when;
 
 class StatisticsEventHandlerTest {
     private final StatisticsAggregationRepository repository = mock(StatisticsAggregationRepository.class);
-    private final StatisticsEventHandler handler = new StatisticsEventHandler(repository);
+    private final ProcessedEventRepository processedEvents = mock(ProcessedEventRepository.class);
+    private final StatisticsEventHandler handler = new StatisticsEventHandler(repository, processedEvents);
 
     @Test
     void createsSourceAndReceivedBucket() {
@@ -35,6 +37,7 @@ class StatisticsEventHandlerTest {
                 submittedAt.toLocalDateTime());
         verify(repository).changeCount(LocalDate.parse("2026-08-15"), 0L, "ROAD", "RECEIVED", 1,
                 submittedAt.toLocalDateTime());
+        verify(processedEvents).save(org.mockito.ArgumentMatchers.any());
     }
 
     @Test
@@ -56,5 +59,22 @@ class StatisticsEventHandlerTest {
         order.verify(repository).changeCount(LocalDate.parse("2026-08-15"), 21L, "ROAD", "ASSIGNED", 1,
                 changedAt.toLocalDateTime());
         order.verify(repository).updateSource(1001L, 21L, "ASSIGNED", changedAt.toLocalDateTime());
+        verify(processedEvents).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void ignoresAlreadyProcessedEvent() {
+        UUID eventId = UUID.randomUUID();
+        when(processedEvents.existsById(eventId.toString())).thenReturn(true);
+        OffsetDateTime submittedAt = OffsetDateTime.parse("2026-08-15T09:30:00+09:00");
+        var payload = new ComplaintCreatedPayload(
+                1001L, "CIV-2026-000184", 501L, 10L, "ROAD", "RECEIVED",
+                submittedAt, List.of(NotifyChannel.IN_APP));
+
+        handler.handleCreated(new EventEnvelope<>(eventId, "ComplaintCreated", "v1", submittedAt,
+                "complaint-service", "1001", payload));
+
+        verify(repository, org.mockito.Mockito.never()).insertSource(
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 }
