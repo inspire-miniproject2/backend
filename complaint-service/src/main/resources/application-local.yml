@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3307/${COMPLAINT_DB_NAME:complaint_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:${COMPLAINT_DB_USER:complaint}}
+    password: ${DB_PASSWORD:${COMPLAINT_DB_PASSWORD:complaint_local_pw}}
+    driver-class-name: ${DB_DRIVER_CLASS_NAME:com.mysql.cj.jdbc.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    show-sql: true
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+
+logging:
+  level:
+    root: INFO
+    com.gcivil: DEBUG
