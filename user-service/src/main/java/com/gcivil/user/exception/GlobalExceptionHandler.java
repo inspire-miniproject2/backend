@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -54,6 +55,20 @@ public class GlobalExceptionHandler {
                         "VALIDATION_ERROR",
                         "요청값 검증에 실패했습니다.",
                         Map.of("fieldErrors", fieldErrors),
+                        requestId(request)
+                ));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingRequestHeaderException(
+            MissingRequestHeaderException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest()
+                .body(ApiErrorResponse.of(
+                        "VALIDATION_ERROR",
+                        "필수 헤더가 누락되었습니다.",
+                        Map.of("header", ex.getHeaderName()),
                         requestId(request)
                 ));
     }
