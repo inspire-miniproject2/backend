@@ -253,7 +253,7 @@
 | `tokenType` | `string` | Y | `"ACCESS"` | 액세스 토큰 구분값 |
 | `iat` | `epoch-seconds` | Y | `1786747800` | 발급 시각 |
 | `exp` | `epoch-seconds` | Y | `1786751400` | 만료 시각 |
-| `iss` | `string` | N | `"minwonon-auth"` | 발급자 식별자 |
+| `iss` | `string` | Y | `"minwonon-auth"` | 발급자 식별자 |
 
 ### 7.3 Refresh Token Payload 최종안
 
@@ -264,7 +264,7 @@
 | `tokenType` | `string` | Y | `"REFRESH"` | 리프레시 토큰 구분값 |
 | `iat` | `epoch-seconds` | Y | `1786747800` | 발급 시각 |
 | `exp` | `epoch-seconds` | Y | `1787352600` | 만료 시각 |
-| `iss` | `string` | N | `"minwonon-auth"` | 발급자 식별자 |
+| `iss` | `string` | Y | `"minwonon-auth"` | 발급자 식별자 |
 
 ### 7.4 서비스가 신뢰하는 토큰 정보
 
@@ -303,6 +303,30 @@ Gateway는 외부에서 들어온 동일 이름 헤더를 모두 제거한 뒤 �
   "iss": "minwonon-auth"
 }
 ```
+
+### 7.7 JWT 서명·수명·검증 최종안
+
+| 항목 | 확정값 |
+|---|---|
+| 알고리즘 | `HS256` |
+| 키 재료 | `JWT_SECRET` 환경변수 문자열의 UTF-8 바이트 |
+| 최소 키 길이 | UTF-8 기준 32바이트 |
+| issuer | `JWT_ISSUER`, 기본값 `minwonon-auth` |
+| Access Token TTL | 기본 3,600초 |
+| Refresh Token TTL | 기본 604,800초 |
+| clock skew | 최대 30초 |
+
+- User Service는 위 계약으로 토큰을 발급하고 Gateway는 동일한 설정으로 검증한다.
+- Gateway는 `HS256` 이외의 `alg`, 잘못된 issuer, 만료 토큰, 미래 발급 토큰, API에 사용된 Refresh Token을 거부한다.
+- 실제 Secret은 Git에 저장하지 않고 로컬 `.env` 또는 배포 Secret으로만 주입한다.
+
+### 7.8 CORS 최종안
+
+- 로컬 프론트엔드 Origin은 `http://localhost:5173`이다.
+- 허용 Origin은 `CORS_ALLOWED_ORIGINS` 환경변수로 관리하고 쉼표로 복수 값을 구분한다.
+- 허용 method는 `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`이다.
+- 허용 요청 header는 `Authorization`, `Content-Type`, `Accept`, `X-Request-Id`이고 응답에서 `X-Request-Id`를 노출한다.
+- Authorization header 기반 인증이므로 credential은 허용하지 않으며 와일드카드 Origin을 사용하지 않는다.
 
 ## 8. Feign DTO Contract Freeze
 
