@@ -57,12 +57,14 @@ jobs:
       - name: Test available services
         if: steps.backend.outputs.available == 'true'
         shell: bash
+        env:
+          SPRING_PROFILES_ACTIVE: test
         run: |
           set -euo pipefail
           tested=0
           for service in discovery-service config-service gateway-service user-service complaint-service assignment-service notification-service statistics-service; do
             if [[ -f "$service/gradlew" ]]; then
               echo "Testing $service"
-              (cd "$service" && chmod +x gradlew && ./gradlew test --no-daemon)
+              (cd "$service" && chmod +x gradlew && ./gradlew test --no-daemon --stacktrace)
             fi
           done

@@ -18,6 +18,16 @@ public class ComplaintStatusPolicy {
         }
     }
 
+    public void validateResponseRegistrationAllowed(ComplaintStatus currentStatus) {
+        if (currentStatus != ComplaintStatus.ASSIGNED && currentStatus != ComplaintStatus.IN_PROGRESS) {
+            throw new ApiException(
+                    HttpStatus.CONFLICT,
+                    "INVALID_STATUS_TRANSITION",
+                    "공식 답변은 ASSIGNED 또는 IN_PROGRESS 상태에서만 등록할 수 있습니다."
+            );
+        }
+    }
+
     public boolean isAutomaticTransition(ComplaintStatus previousStatus, ComplaintStatus newStatus) {
         return previousStatus == ComplaintStatus.RECEIVED && newStatus == ComplaintStatus.ASSIGNED;
     }
