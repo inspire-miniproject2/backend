@@ -94,6 +94,26 @@ GET /api/v1/admin/statistics/ping
 ./scripts/start-all.sh
 ```
 
+## 테스트 실행
+
+Windows PowerShell에서 모든 서비스의 단위 테스트와 Notification/Statistics의 Embedded Kafka 통합 테스트를 한 번에 실행합니다.
+
+```powershell
+.\scripts\run-all-tests.ps1
+```
+
+Kafka 통합 테스트만 개별 실행하려면 해당 서비스 디렉터리에서 다음 명령을 사용합니다. Embedded Kafka와 H2를 사용하므로 별도의 Docker Compose 실행은 필요하지 않습니다.
+
+```powershell
+cd notification-service
+.\gradlew.bat integrationTest --no-daemon
+
+cd ..\statistics-service
+.\gradlew.bat integrationTest --no-daemon
+```
+
+통합 테스트는 producer와 동일하게 Kafka 타입 헤더가 없는 JSON을 발행하며, 실제 listener를 통한 소비·멱등 처리·집계·DLT 동작을 확인합니다.
+
 ## 개발 배포 준비
 
 - S3 첨부파일 환경변수와 EC2 IAM Role 규칙: [docs/s3-attachments.md](docs/s3-attachments.md)
