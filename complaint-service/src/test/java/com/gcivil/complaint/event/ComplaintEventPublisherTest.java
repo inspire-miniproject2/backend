@@ -40,8 +40,8 @@ class ComplaintEventPublisherTest {
     void publishesAllSupportedEventKinds() {
         OffsetDateTime now = OffsetDateTime.parse("2026-08-15T10:00:00+09:00");
         publisher.publishComplaintStatusChanged(new ComplaintStatusChangedPayload(
-                1001L, "CIV-2026-000184", "RECEIVED", "ASSIGNED", null,
-                21L, 9001L, now, List.of(NotifyChannel.IN_APP)));
+                1001L, "CIV-2026-000184", 501L, 10L, "ROAD", "RECEIVED", "ASSIGNED",
+                21L, 9001L, null, now, null, null, List.of(NotifyChannel.IN_APP)));
         publisher.publishComplaintResponseRegistered(new ComplaintResponseRegisteredPayload(
                 1001L, "CIV-2026-000184", 7001L, 501L, 9001L, true,
                 now, 21L, List.of(NotifyChannel.EMAIL)));
