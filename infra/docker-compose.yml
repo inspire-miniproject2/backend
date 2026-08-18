@@ -37,14 +37,22 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      KAFKA_COMPLAINT_STATUS_TOPIC: ${KAFKA_COMPLAINT_STATUS_TOPIC:-complaint-status-changed.v1}
-      KAFKA_COMPLAINT_STATUS_DLT: ${KAFKA_COMPLAINT_STATUS_DLT:-complaint-status-changed.v1.dlt}
+      KAFKA_COMPLAINT_CREATED_TOPIC: ${KAFKA_COMPLAINT_CREATED_TOPIC:-complaint.created.v1}
+      KAFKA_COMPLAINT_CREATED_DLT: ${KAFKA_COMPLAINT_CREATED_DLT:-complaint.created.v1.dlt}
+      KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC: ${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC:-complaint.status.changed.v1}
+      KAFKA_COMPLAINT_STATUS_CHANGED_DLT: ${KAFKA_COMPLAINT_STATUS_CHANGED_DLT:-complaint.status.changed.v1.dlt}
+      KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC:-complaint.response.registered.v1}
+      KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT:-complaint.response.registered.v1.dlt}
     command:
       - /bin/bash
       - -c
       - |
-        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic "$${KAFKA_COMPLAINT_STATUS_TOPIC}" --partitions 3 --replication-factor 1
-        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic "$${KAFKA_COMPLAINT_STATUS_DLT}" --partitions 1 --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic "$${KAFKA_COMPLAINT_CREATED_TOPIC}" --partitions 3 --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic "$${KAFKA_COMPLAINT_CREATED_DLT}" --partitions 1 --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic "$${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC}" --partitions 3 --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic "$${KAFKA_COMPLAINT_STATUS_CHANGED_DLT}" --partitions 1 --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic "$${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC}" --partitions 3 --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic "$${KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT}" --partitions 1 --replication-factor 1
         /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
     restart: "no"
     networks: [g-civil-network]

@@ -6,6 +6,25 @@ spring:
       hibernate:
         jdbc:
           time_zone: Asia/Seoul
+  kafka:
+    consumer:
+      group-id: statistics-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.use.type.headers: false
+    listener:
+      ack-mode: record
+
+gcivil:
+  kafka:
+    topics:
+      complaint-created: ${KAFKA_COMPLAINT_CREATED_TOPIC:complaint.created.v1}
+      complaint-created-dlt: ${KAFKA_COMPLAINT_CREATED_DLT:complaint.created.v1.dlt}
+      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC:complaint.status.changed.v1}
+      complaint-status-changed-dlt: ${KAFKA_COMPLAINT_STATUS_CHANGED_DLT:complaint.status.changed.v1.dlt}
 
 management:
   info:

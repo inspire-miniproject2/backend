@@ -10,6 +10,10 @@ spring:
     producer:
       acks: all
       retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
   cloud:
     openfeign:
       circuitbreaker:
@@ -23,4 +27,6 @@ spring:
 gcivil:
   kafka:
     topics:
-      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_TOPIC:complaint-status-changed.v1}
+      complaint-created: ${KAFKA_COMPLAINT_CREATED_TOPIC:complaint.created.v1}
+      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC:complaint.status.changed.v1}
+      complaint-response-registered: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC:complaint.response.registered.v1}
