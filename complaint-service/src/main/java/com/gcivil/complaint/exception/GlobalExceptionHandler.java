@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -83,6 +84,19 @@ public class GlobalExceptionHandler {
                 "VALIDATION_ERROR",
                 "필수 헤더가 누락되었습니다.",
                 Map.of("header", ex.getHeaderName()),
+                requestId(request)
+        ));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest().body(ApiErrorResponse.of(
+                "VALIDATION_ERROR",
+                "요청 본문 형식이 올바르지 않습니다.",
+                null,
                 requestId(request)
         ));
     }

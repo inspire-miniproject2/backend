@@ -4,6 +4,7 @@
 
 ## Implemented Scope
 - `POST /api/v1/complaints` multipart 민원 접수
+- `GET /api/v1/officer/complaints` 담당 민원 목록 조회
 - `PATCH /api/v1/officer/complaints/{complaintId}/status` 상태 변경
 - `POST /api/v1/officer/complaints/{complaintId}/response` 공식 답변 등록
 - 첨부파일 메타데이터 저장

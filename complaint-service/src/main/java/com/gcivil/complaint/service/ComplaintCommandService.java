@@ -33,19 +33,22 @@ public class ComplaintCommandService {
     private final ComplaintStatusHistoryService complaintStatusHistoryService;
     private final AssignmentIntegrationService assignmentIntegrationService;
     private final ComplaintEventPublisher complaintEventPublisher;
+    private final AttachmentStorage attachmentStorage;
 
     public ComplaintCommandService(
             ComplaintRepository complaintRepository,
             ComplaintNumberGenerator complaintNumberGenerator,
             ComplaintStatusHistoryService complaintStatusHistoryService,
             AssignmentIntegrationService assignmentIntegrationService,
-            ComplaintEventPublisher complaintEventPublisher
+            ComplaintEventPublisher complaintEventPublisher,
+            AttachmentStorage attachmentStorage
     ) {
         this.complaintRepository = complaintRepository;
         this.complaintNumberGenerator = complaintNumberGenerator;
         this.complaintStatusHistoryService = complaintStatusHistoryService;
         this.assignmentIntegrationService = assignmentIntegrationService;
         this.complaintEventPublisher = complaintEventPublisher;
+        this.attachmentStorage = attachmentStorage;
     }
 
     @Transactional
@@ -69,7 +72,9 @@ public class ComplaintCommandService {
             if (attachmentFile == null || attachmentFile.isEmpty()) {
                 continue;
             }
-            complaint.addAttachment(toAttachment(complaint.getComplaintNo(), attachmentFile, now));
+            ComplaintAttachment attachment = toAttachment(complaint.getComplaintNo(), attachmentFile, now);
+            storeAttachment(attachment, attachmentFile);
+            complaint.addAttachment(attachment);
         }
 
         complaintRepository.save(complaint);
@@ -91,6 +96,7 @@ public class ComplaintCommandService {
         AssignmentResponse assignmentResponse = assignmentIntegrationService.requestAssignment(complaint, requestId);
         if (assignmentResponse.assignmentFound()) {
             complaint.markAssigned(
+                    assignmentResponse.departmentName(),
                     assignmentResponse.departmentId(),
                     assignmentResponse.officerUserId(),
                     assignmentResponse.assignedAt() == null ? now : assignmentResponse.assignedAt()
@@ -153,6 +159,16 @@ public class ComplaintCommandService {
                 attachmentFile.getSize(),
                 now
         );
+    }
+
+    private void storeAttachment(ComplaintAttachment attachment, MultipartFile attachmentFile) {
+        try {
+            attachmentStorage.store(attachment.getFilePath(), attachmentFile);
+        } catch (IllegalStateException ex) {
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "현재 첨부파일 저장소를 사용할 수 없습니다.");
+        } catch (Exception ex) {
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "첨부파일 저장에 실패했습니다.");
+        }
     }
 
     private void validateNotifyChannels(List<String> rawChannels) {

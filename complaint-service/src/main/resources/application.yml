@@ -29,7 +29,13 @@ management:
 clients:
   assignment-service:
     url: ${ASSIGNMENT_SERVICE_URL:http://localhost:8082}
+  user-service:
+    url: ${USER_SERVICE_URL:http://localhost:8084}
 gcivil:
+  attachment:
+    storage:
+      type: ${FILE_STORAGE_TYPE:local}
+      local-root: ${ATTACHMENT_LOCAL_ROOT:${java.io.tmpdir}/minwonon-attachments}
   kafka:
     topics:
       complaint-created: ${KAFKA_COMPLAINT_CREATED_TOPIC:complaint.created.v1}

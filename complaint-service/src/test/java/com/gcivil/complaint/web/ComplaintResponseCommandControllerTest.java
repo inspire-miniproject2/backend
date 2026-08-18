@@ -153,7 +153,7 @@ class ComplaintResponseCommandControllerTest {
                 LocalDateTime.of(2026, 8, 18, 9, 0),
                 LocalDateTime.of(2026, 8, 18, 9, 0)
         );
-        complaint.markAssigned(10L, 201L, LocalDateTime.of(2026, 8, 18, 9, 10));
+        complaint.markAssigned("교통정책과", 10L, 201L, LocalDateTime.of(2026, 8, 18, 9, 10));
         return complaint;
     }
 

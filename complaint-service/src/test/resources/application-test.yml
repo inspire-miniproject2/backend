@@ -28,3 +28,5 @@ eureka:
 clients:
   assignment-service:
     url: http://localhost:8082
+  user-service:
+    url: http://localhost:8084

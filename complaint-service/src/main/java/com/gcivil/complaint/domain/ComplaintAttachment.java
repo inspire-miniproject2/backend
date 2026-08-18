@@ -75,4 +75,28 @@ public class ComplaintAttachment {
     public Long getId() {
         return id;
     }
+
+    public String getOriginalFilename() {
+        return originalFilename;
+    }
+
+    public String getStoredFilename() {
+        return storedFilename;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public LocalDateTime getUploadedAt() {
+        return uploadedAt;
+    }
 }
