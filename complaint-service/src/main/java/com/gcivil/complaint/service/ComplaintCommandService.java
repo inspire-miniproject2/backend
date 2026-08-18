@@ -106,12 +106,17 @@ public class ComplaintCommandService {
             ComplaintStatusChangedPayload statusChangedPayload = new ComplaintStatusChangedPayload(
                     complaint.getId(),
                     complaint.getComplaintNo(),
+                    complaint.getApplicantUserId(),
+                    complaint.getCategoryId(),
+                    complaint.getCategoryCode(),
                     ComplaintStatus.RECEIVED.name(),
                     ComplaintStatus.ASSIGNED.name(),
-                    null,
                     complaint.getAssignedDepartmentId(),
                     complaint.getAssignedOfficerUserId(),
+                    null,
                     toOffsetDateTime(complaint.getAssignedAt()),
+                    null,
+                    null,
                     toEventNotifyChannels(notifyChannels)
             );
             complaintEventPublisher.publishComplaintStatusChanged(statusChangedPayload);
