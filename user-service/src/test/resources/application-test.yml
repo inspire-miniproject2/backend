@@ -1,0 +1,24 @@
+spring:
+  config:
+    import: ""
+  cloud:
+    config:
+      enabled: false
+  datasource:
+    url: jdbc:h2:mem:usertest;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: false
+  sql:
+    init:
+      encoding: UTF-8
+      mode: always
+
+eureka:
+  client:
+    enabled: false
