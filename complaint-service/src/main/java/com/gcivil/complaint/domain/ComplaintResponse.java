@@ -40,4 +40,47 @@ public class ComplaintResponse {
 
     protected ComplaintResponse() {
     }
+
+    public ComplaintResponse(
+            Complaint complaint,
+            Long responderUserId,
+            String responseContent,
+            boolean isPublic,
+            LocalDateTime respondedAt
+    ) {
+        this.complaint = complaint;
+        this.responderUserId = responderUserId;
+        this.responseContent = responseContent;
+        this.isPublic = isPublic;
+        this.respondedAt = respondedAt;
+        this.updatedAt = respondedAt;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Complaint getComplaint() {
+        return complaint;
+    }
+
+    public Long getResponderUserId() {
+        return responderUserId;
+    }
+
+    public String getResponseContent() {
+        return responseContent;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public LocalDateTime getRespondedAt() {
+        return respondedAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }
