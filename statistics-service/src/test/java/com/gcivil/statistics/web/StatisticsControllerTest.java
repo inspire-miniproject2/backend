@@ -34,6 +34,7 @@ class StatisticsControllerTest {
                 .thenReturn(new DailyStatisticsResponse(List.of()));
 
         mockMvc.perform(get("/api/v1/admin/statistics/daily")
+                        .header("X-User-Role", "ADMIN")
                         .param("fromDate", "2026-08-01")
                         .param("toDate", "2026-08-14")
                         .param("departmentId", "21"))
@@ -41,5 +42,22 @@ class StatisticsControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.content").isArray())
                 .andExpect(jsonPath("$.message").value("일별 통계를 조회했습니다."));
+    }
+
+    @Test
+    void rejectsMissingRole() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/statistics/daily")
+                        .param("fromDate", "2026-08-01")
+                        .param("toDate", "2026-08-14"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void rejectsNonAdminRole() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/statistics/daily")
+                        .header("X-User-Role", "OFFICER")
+                        .param("fromDate", "2026-08-01")
+                        .param("toDate", "2026-08-14"))
+                .andExpect(status().isForbidden());
     }
 }
