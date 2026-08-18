@@ -2,6 +2,9 @@ name: CI
 
 on:
   workflow_dispatch:
+  pull_request:
+  push:
+    branches: [develop]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -32,7 +35,7 @@ jobs:
         shell: bash
         run: |
           available=false
-          for service in discovery-service config-service gateway-service user-service complaint-service assignment-service notification-service; do
+          for service in discovery-service config-service gateway-service user-service complaint-service assignment-service notification-service statistics-service; do
             if [[ -f "$service/gradlew" ]]; then
               available=true
               break
@@ -55,7 +58,7 @@ jobs:
         run: |
           set -euo pipefail
           tested=0
-          for service in discovery-service config-service gateway-service complaint-service assignment-service notification-service; do
+          for service in discovery-service config-service gateway-service user-service complaint-service assignment-service notification-service statistics-service; do
             if [[ -f "$service/gradlew" ]]; then
               echo "Testing $service"
               (cd "$service" && chmod +x gradlew && ./gradlew test --no-daemon)

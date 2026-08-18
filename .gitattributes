@@ -1,0 +1,6 @@
+# Linux containers and CI execute these files directly.
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Windows wrapper entrypoints keep native line endings.
+*.bat text eol=crlf

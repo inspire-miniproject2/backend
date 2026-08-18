@@ -16,6 +16,12 @@ services:
       KAFKA_COMPLAINT_STATUS_DLT: ${KAFKA_COMPLAINT_STATUS_DLT:-complaint-status-changed.v1.dlt}
     volumes:
       - ../config-repo:/config:ro
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8888'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
     networks: [g-civil-network]
 
   discovery-service:
@@ -23,7 +29,8 @@ services:
       context: ../discovery-service
     restart: unless-stopped
     depends_on:
-      - config-service
+      config-service:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${DISCOVERY_PORT:-8761}:8761"
     environment:
@@ -32,6 +39,13 @@ services:
       SPRING_APPLICATION_NAME: discovery-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      CONFIG_SERVER_URL: http://config-service:8888
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8761'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
     networks: [g-civil-network]
 
   gateway-service:
@@ -39,8 +53,10 @@ services:
       context: ../gateway-service
     restart: unless-stopped
     depends_on:
-      - config-service
-      - discovery-service
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-8080}:8080"
     environment:
@@ -49,6 +65,7 @@ services:
       SPRING_APPLICATION_NAME: gateway-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      CONFIG_SERVER_URL: http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     networks: [g-civil-network]
@@ -70,6 +87,7 @@ services:
       SPRING_APPLICATION_NAME: user-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      CONFIG_SERVER_URL: http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:mariadb://user-db:3306/${USER_DB_NAME:-user_db}
       SPRING_DATASOURCE_USERNAME: ${USER_DB_USER:-user}
@@ -96,6 +114,7 @@ services:
       SPRING_APPLICATION_NAME: complaint-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      CONFIG_SERVER_URL: http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:mariadb://complaint-db:3306/${COMPLAINT_DB_NAME:-complaint_db}
       SPRING_DATASOURCE_USERNAME: ${COMPLAINT_DB_USER:-complaint}
@@ -122,6 +141,7 @@ services:
       SPRING_APPLICATION_NAME: assignment-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      CONFIG_SERVER_URL: http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:mariadb://assignment-db:3306/${ASSIGNMENT_DB_NAME:-assignment_db}
       SPRING_DATASOURCE_USERNAME: ${ASSIGNMENT_DB_USER:-assignment}
@@ -148,6 +168,7 @@ services:
       SPRING_APPLICATION_NAME: notification-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      CONFIG_SERVER_URL: http://config-service:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:mariadb://notification-db:3306/${NOTIFICATION_DB_NAME:-notification_db}
       SPRING_DATASOURCE_USERNAME: ${NOTIFICATION_DB_USER:-notification}
@@ -156,4 +177,28 @@ services:
       KAFKA_COMPLAINT_STATUS_TOPIC: ${KAFKA_COMPLAINT_STATUS_TOPIC:-complaint-status-changed.v1}
       KAFKA_COMPLAINT_STATUS_DLT: ${KAFKA_COMPLAINT_STATUS_DLT:-complaint-status-changed.v1.dlt}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+    networks: [g-civil-network]
+
+  statistics-service:
+    build:
+      context: ../statistics-service
+    restart: unless-stopped
+    depends_on:
+      statistics-db:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${STATISTICS_PORT:-8085}:8085"
+    environment:
+      TZ: ${TZ:-Asia/Seoul}
+      SERVER_PORT: 8085
+      SPRING_APPLICATION_NAME: statistics-service
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      CONFIG_SERVER_URL: http://config-service:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mariadb://statistics-db:3306/${STATISTICS_DB_NAME:-statistics_db}
+      SPRING_DATASOURCE_USERNAME: ${STATISTICS_DB_USER:-statistics}
+      SPRING_DATASOURCE_PASSWORD: ${STATISTICS_DB_PASSWORD}
     networks: [g-civil-network]
