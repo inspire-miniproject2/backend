@@ -29,6 +29,12 @@ spring:
             read-timeout: 3000
 
 gcivil:
+  storage:
+    type: ${FILE_STORAGE_TYPE:local}
+    s3:
+      region: ${AWS_REGION:ap-northeast-2}
+      bucket: ${S3_ATTACHMENT_BUCKET:}
+      prefix: ${S3_ATTACHMENT_PREFIX:complaints/}
   kafka:
     topics:
       complaint-created: ${KAFKA_COMPLAINT_CREATED_TOPIC:complaint.created.v1}

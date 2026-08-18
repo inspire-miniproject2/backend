@@ -3,7 +3,40 @@ set -uo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$PROJECT_DIR/.env"
-COMPOSE_FILE="$PROJECT_DIR/infra/docker-compose.yml"
+COMPOSE_FILES=("$PROJECT_DIR/infra/docker-compose.yml")
+strict=false
+
+resolve_path() {
+  if [[ "$1" = /* ]]; then
+    printf '%s\n' "$1"
+  else
+    printf '%s\n' "$PROJECT_DIR/$1"
+  fi
+}
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --strict)
+      strict=true
+      shift
+      ;;
+    --env-file)
+      [[ "$#" -ge 2 ]] || { echo "Missing value for --env-file"; exit 2; }
+      ENV_FILE="$(resolve_path "$2")"
+      shift 2
+      ;;
+    --compose-file)
+      [[ "$#" -ge 2 ]] || { echo "Missing value for --compose-file"; exit 2; }
+      COMPOSE_FILES+=("$(resolve_path "$2")")
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: $0 [--strict] [--env-file PATH] [--compose-file PATH]"
+      exit 2
+      ;;
+  esac
+done
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "Missing $ENV_FILE"
@@ -16,14 +49,13 @@ source "$ENV_FILE"
 set +a
 
 failure=0
-strict=false
-
-if [[ "${1:-}" == "--strict" ]]; then
-  strict=true
-fi
+compose_args=(--env-file "$ENV_FILE")
+for compose_file in "${COMPOSE_FILES[@]}"; do
+  compose_args+=(-f "$compose_file")
+done
 
 echo "Infrastructure containers"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" ps
+docker compose "${compose_args[@]}" ps
 
 check_http() {
   local name="$1"

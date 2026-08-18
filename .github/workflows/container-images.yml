@@ -17,6 +17,7 @@ on:
           - complaint-service
           - assignment-service
           - notification-service
+          - statistics-service
 
 concurrency:
   group: container-images
@@ -47,7 +48,7 @@ jobs:
 
           all_services=(
             config-service discovery-service gateway-service user-service
-            complaint-service assignment-service notification-service
+            complaint-service assignment-service notification-service statistics-service
           )
 
           if [[ "$SELECTED_SERVICE" == "all" ]]; then
@@ -76,4 +77,3 @@ jobs:
           if [[ "$published" -eq 0 ]]; then
             echo "No container image was published."
           fi
-
