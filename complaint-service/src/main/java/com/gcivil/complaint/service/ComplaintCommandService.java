@@ -34,6 +34,7 @@ public class ComplaintCommandService {
     private final AssignmentIntegrationService assignmentIntegrationService;
     private final ComplaintEventPublisher complaintEventPublisher;
     private final AttachmentStorage attachmentStorage;
+    private final UserAccessGuard userAccessGuard;
 
     public ComplaintCommandService(
             ComplaintRepository complaintRepository,
@@ -41,7 +42,8 @@ public class ComplaintCommandService {
             ComplaintStatusHistoryService complaintStatusHistoryService,
             AssignmentIntegrationService assignmentIntegrationService,
             ComplaintEventPublisher complaintEventPublisher,
-            AttachmentStorage attachmentStorage
+            AttachmentStorage attachmentStorage,
+            UserAccessGuard userAccessGuard
     ) {
         this.complaintRepository = complaintRepository;
         this.complaintNumberGenerator = complaintNumberGenerator;
@@ -49,10 +51,17 @@ public class ComplaintCommandService {
         this.assignmentIntegrationService = assignmentIntegrationService;
         this.complaintEventPublisher = complaintEventPublisher;
         this.attachmentStorage = attachmentStorage;
+        this.userAccessGuard = userAccessGuard;
     }
 
     @Transactional
-    public CreateComplaintResponse createComplaint(CreateComplaintRequest request, Long applicantUserId, String requestId) {
+    public CreateComplaintResponse createComplaint(
+            CreateComplaintRequest request,
+            Long applicantUserId,
+            String requesterRole,
+            String requestId
+    ) {
+        userAccessGuard.requireCitizen(requesterRole);
         validateNotifyChannels(request.getNotifyChannels());
 
         LocalDateTime now = LocalDateTime.now();

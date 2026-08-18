@@ -29,6 +29,7 @@ public class ComplaintOfficerQueryController {
     @GetMapping
     public ResponseEntity<ApiResponse<AssignedComplaintListResponse>> getAssignedComplaints(
             @RequestHeader("X-User-Id") @Positive(message = "X-User-Id must be positive") Long officerUserId,
+            @RequestHeader("X-User-Role") String requesterRole,
             @RequestHeader(value = "X-Request-Id", required = false) String requestId,
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "page must be greater than or equal to 0") Integer page,
             @RequestParam(defaultValue = "20") @Min(value = 1, message = "size must be at least 1")
@@ -37,7 +38,15 @@ public class ComplaintOfficerQueryController {
             @RequestParam(required = false) @Size(max = 50, message = "keyword must be at most 50 characters") String keyword
     ) {
         AssignedComplaintListResponse response =
-                complaintOfficerQueryService.getAssignedComplaints(officerUserId, page, size, status, keyword, requestId);
+                complaintOfficerQueryService.getAssignedComplaints(
+                        officerUserId,
+                        requesterRole,
+                        page,
+                        size,
+                        status,
+                        keyword,
+                        requestId
+                );
         return ResponseEntity.ok(ApiResponse.success(response, "담당 민원 목록을 조회했습니다."));
     }
 }

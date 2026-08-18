@@ -32,9 +32,11 @@ public class ComplaintCommandController {
     public ResponseEntity<ApiResponse<CreateComplaintResponse>> createComplaint(
             @Valid @ModelAttribute CreateComplaintRequest request,
             @RequestHeader("X-User-Id") @Positive(message = "X-User-Id must be positive") Long applicantUserId,
+            @RequestHeader("X-User-Role") String requesterRole,
             @RequestHeader(value = "X-Request-Id", required = false) String requestId
     ) {
-        CreateComplaintResponse response = complaintCommandService.createComplaint(request, applicantUserId, requestId);
+        CreateComplaintResponse response =
+                complaintCommandService.createComplaint(request, applicantUserId, requesterRole, requestId);
         String message = response.currentStatus() == ComplaintStatus.ASSIGNED
                 ? "민원이 접수되고 담당 부서 및 공무원에게 배정되었습니다."
                 : "민원이 접수되었으며 자동 배정 대기 상태로 저장되었습니다.";

@@ -31,10 +31,18 @@ public class ComplaintResponseCommandController {
     public ResponseEntity<ApiResponse<RegisterComplaintResponseResponse>> registerResponse(
             @PathVariable @Positive(message = "complaintId must be positive") Long complaintId,
             @Valid @RequestBody RegisterComplaintResponseRequest request,
-            @RequestHeader("X-User-Id") @Positive(message = "X-User-Id must be positive") Long responderUserId
+            @RequestHeader("X-User-Id") @Positive(message = "X-User-Id must be positive") Long responderUserId,
+            @RequestHeader("X-User-Role") String requesterRole,
+            @RequestHeader(value = "X-Department-Id", required = false) Long departmentId
     ) {
         RegisterComplaintResponseResponse response =
-                complaintResponseCommandService.registerResponse(complaintId, request, responderUserId);
+                complaintResponseCommandService.registerResponse(
+                        complaintId,
+                        request,
+                        responderUserId,
+                        requesterRole,
+                        departmentId
+                );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "민원 답변이 등록되었습니다."));
     }

@@ -27,35 +27,41 @@ public class ComplaintOfficerQueryService {
 
     private final ComplaintRepository complaintRepository;
     private final UserServiceClient userServiceClient;
+    private final UserAccessGuard userAccessGuard;
 
     public ComplaintOfficerQueryService(
             ComplaintRepository complaintRepository,
-            UserServiceClient userServiceClient
+            UserServiceClient userServiceClient,
+            UserAccessGuard userAccessGuard
     ) {
         this.complaintRepository = complaintRepository;
         this.userServiceClient = userServiceClient;
+        this.userAccessGuard = userAccessGuard;
     }
 
     @Transactional(readOnly = true)
     public AssignedComplaintListResponse getAssignedComplaints(
             Long officerUserId,
+            String requesterRole,
             Integer page,
             Integer size,
             String status,
             String keyword
     ) {
-        return getAssignedComplaints(officerUserId, page, size, status, keyword, null);
+        return getAssignedComplaints(officerUserId, requesterRole, page, size, status, keyword, null);
     }
 
     @Transactional(readOnly = true)
     public AssignedComplaintListResponse getAssignedComplaints(
             Long officerUserId,
+            String requesterRole,
             Integer page,
             Integer size,
             String status,
             String keyword,
             String requestId
     ) {
+        userAccessGuard.requireOfficerOrAdmin(requesterRole);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
         ComplaintStatus complaintStatus = parseStatus(status);
         String normalizedKeyword = normalizeKeyword(keyword);

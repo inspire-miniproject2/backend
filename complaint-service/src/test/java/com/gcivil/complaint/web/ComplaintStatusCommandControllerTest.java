@@ -64,6 +64,8 @@ class ComplaintStatusCommandControllerTest {
         mockMvc.perform(patch("/api/v1/officer/complaints/{complaintId}/status", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new StatusRequestFixture(
                                 "IN_PROGRESS",
                                 "현장 조사 착수"
@@ -85,6 +87,8 @@ class ComplaintStatusCommandControllerTest {
         mockMvc.perform(patch("/api/v1/officer/complaints/{complaintId}/status", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new StatusRequestFixture(
                                 "COMPLETED",
                                 "바로 완료 처리 시도"
@@ -103,6 +107,8 @@ class ComplaintStatusCommandControllerTest {
         mockMvc.perform(patch("/api/v1/officer/complaints/{complaintId}/status", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new StatusRequestFixture(
                                 "COMPLETED",
                                 "답변 없이 완료 시도"
@@ -121,6 +127,8 @@ class ComplaintStatusCommandControllerTest {
         mockMvc.perform(post("/api/v1/officer/complaints/{complaintId}/response", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new ResponseRequestFixture(
                                 "현장 교통량과 보행량 분석 결과에 따라 등교 시간대 보행 신호를 연장하기로 결정했습니다.",
                                 true
@@ -130,6 +138,8 @@ class ComplaintStatusCommandControllerTest {
         mockMvc.perform(patch("/api/v1/officer/complaints/{complaintId}/status", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new StatusRequestFixture(
                                 "COMPLETED",
                                 "조치 완료"
@@ -143,6 +153,25 @@ class ComplaintStatusCommandControllerTest {
         assertThat(updatedComplaint.getCompletedAt()).isNotNull();
         verify(complaintEventPublisher).publishComplaintResponseRegistered(any());
         verify(complaintEventPublisher).publishComplaintStatusChanged(any());
+    }
+
+    @Test
+    void changeStatusRejectsDifferentDepartmentOfficer() throws Exception {
+        Complaint complaint = complaintRepository.save(assignedComplaint());
+
+        mockMvc.perform(patch("/api/v1/officer/complaints/{complaintId}/status", complaint.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", "202")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "11")
+                        .content(objectMapper.writeValueAsString(new StatusRequestFixture(
+                                "IN_PROGRESS",
+                                "다른 부서 처리 시도"
+                        ))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("FORBIDDEN"));
+
+        verify(complaintEventPublisher, never()).publishComplaintStatusChanged(any());
     }
 
     private Complaint assignedComplaint() {

@@ -79,7 +79,8 @@ class ComplaintAttachmentDownloadControllerTest {
                         .param("categoryCode", "TRAFFIC")
                         .param("title", "첨부파일 다운로드 테스트")
                         .param("content", "첨부파일 다운로드 동작을 충분한 길이로 테스트합니다.")
-                        .header("X-User-Id", "101"))
+                        .header("X-User-Id", "101")
+                        .header("X-User-Role", "CITIZEN"))
                 .andExpect(status().isCreated());
 
         Long complaintId = complaintRepository.findAll().get(0).getId();
