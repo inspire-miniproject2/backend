@@ -30,26 +30,31 @@ public class ComplaintStatusCommandService {
     private final ComplaintStatusHistoryService complaintStatusHistoryService;
     private final ComplaintStatusPolicy complaintStatusPolicy;
     private final ComplaintEventPublisher complaintEventPublisher;
+    private final UserAccessGuard userAccessGuard;
 
     public ComplaintStatusCommandService(
             ComplaintRepository complaintRepository,
             ComplaintResponseRepository complaintResponseRepository,
             ComplaintStatusHistoryService complaintStatusHistoryService,
             ComplaintStatusPolicy complaintStatusPolicy,
-            ComplaintEventPublisher complaintEventPublisher
+            ComplaintEventPublisher complaintEventPublisher,
+            UserAccessGuard userAccessGuard
     ) {
         this.complaintRepository = complaintRepository;
         this.complaintResponseRepository = complaintResponseRepository;
         this.complaintStatusHistoryService = complaintStatusHistoryService;
         this.complaintStatusPolicy = complaintStatusPolicy;
         this.complaintEventPublisher = complaintEventPublisher;
+        this.userAccessGuard = userAccessGuard;
     }
 
     @Transactional
     public ChangeComplaintStatusResponse changeStatus(
             Long complaintId,
             ChangeComplaintStatusRequest request,
-            Long changedByUserId
+            Long changedByUserId,
+            String requesterRole,
+            Long departmentId
     ) {
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new ApiException(
@@ -57,6 +62,7 @@ public class ComplaintStatusCommandService {
                         "RESOURCE_NOT_FOUND",
                         "민원을 찾을 수 없습니다."
                 ));
+        userAccessGuard.requireAssignedDepartmentOrAdmin(complaint, requesterRole, departmentId);
 
         ComplaintStatus newStatus = parseStatus(request.getNewStatus());
         ComplaintStatus previousStatus = complaint.getCurrentStatus();

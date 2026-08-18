@@ -91,6 +91,7 @@ class ComplaintCommandControllerTest {
                         .param("content", "출근 시간대 차량 정체로 인해 보행 대기 시간이 과도하게 길어 조정 검토를 요청드립니다.")
                         .param("notifyChannels", "EMAIL")
                         .header("X-User-Id", "101")
+                        .header("X-User-Role", "CITIZEN")
                         .header("X-Request-Id", "req-complaint-1"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
@@ -122,7 +123,8 @@ class ComplaintCommandControllerTest {
                         .param("categoryCode", "TRAFFIC")
                         .param("title", "어린이보호구역 신호시간 조정 요청")
                         .param("content", "출근 시간대 차량 정체로 인해 보행 대기 시간이 과도하게 길어 조정 검토를 요청드립니다.")
-                        .header("X-User-Id", "101"))
+                        .header("X-User-Id", "101")
+                        .header("X-User-Role", "CITIZEN"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.currentStatus").value("RECEIVED"))
                 .andExpect(jsonPath("$.data.assignedDepartmentId").value(org.hamcrest.Matchers.nullValue()))
@@ -145,9 +147,23 @@ class ComplaintCommandControllerTest {
                         .param("title", "어린이보호구역 신호시간 조정 요청")
                         .param("content", "출근 시간대 차량 정체로 인해 보행 대기 시간이 과도하게 길어 조정 검토를 요청드립니다.")
                         .param("notifyChannels", "SMS")
-                        .header("X-User-Id", "101"))
+                        .header("X-User-Id", "101")
+                        .header("X-User-Role", "CITIZEN"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void createComplaintRejectsOfficerRole() throws Exception {
+        mockMvc.perform(multipart("/api/v1/complaints")
+                        .param("categoryId", "1")
+                        .param("categoryCode", "TRAFFIC")
+                        .param("title", "어린이보호구역 신호시간 조정 요청")
+                        .param("content", "출근 시간대 차량 정체로 인해 보행 대기 시간이 과도하게 길어 조정 검토를 요청드립니다.")
+                        .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("FORBIDDEN"));
     }
 }

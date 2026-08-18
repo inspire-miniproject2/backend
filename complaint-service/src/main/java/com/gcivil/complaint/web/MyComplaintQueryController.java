@@ -29,6 +29,7 @@ public class MyComplaintQueryController {
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<MyComplaintListResponse>> getMyComplaints(
             @RequestHeader("X-User-Id") @Positive(message = "X-User-Id must be positive") Long applicantUserId,
+            @RequestHeader("X-User-Role") String requesterRole,
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "page must be greater than or equal to 0") Integer page,
             @RequestParam(defaultValue = "20") @Min(value = 1, message = "size must be at least 1")
             @Max(value = 100, message = "size must be less than or equal to 100") Integer size,
@@ -37,7 +38,15 @@ public class MyComplaintQueryController {
             @RequestParam(required = false) String status
     ) {
         MyComplaintListResponse response =
-                myComplaintQueryService.getMyComplaints(applicantUserId, page, size, keyword, categoryCode, status);
+                myComplaintQueryService.getMyComplaints(
+                        applicantUserId,
+                        requesterRole,
+                        page,
+                        size,
+                        keyword,
+                        categoryCode,
+                        status
+                );
         return ResponseEntity.ok(ApiResponse.success(response, "내 민원 목록을 조회했습니다."));
     }
 }

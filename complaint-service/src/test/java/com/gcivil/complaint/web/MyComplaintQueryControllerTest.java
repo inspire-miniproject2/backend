@@ -72,7 +72,8 @@ class MyComplaintQueryControllerTest {
         ));
 
         mockMvc.perform(get("/api/v1/complaints/my")
-                        .header("X-User-Id", "101"))
+                        .header("X-User-Id", "101")
+                        .header("X-User-Role", "CITIZEN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("내 민원 목록을 조회했습니다."))
@@ -122,6 +123,7 @@ class MyComplaintQueryControllerTest {
 
         mockMvc.perform(get("/api/v1/complaints/my")
                         .header("X-User-Id", "101")
+                        .header("X-User-Role", "CITIZEN")
                         .param("status", "IN_PROGRESS")
                         .param("categoryCode", "traffic")
                         .param("keyword", "신호"))
@@ -135,10 +137,20 @@ class MyComplaintQueryControllerTest {
     void getMyComplaintsRejectsInvalidStatus() throws Exception {
         mockMvc.perform(get("/api/v1/complaints/my")
                         .header("X-User-Id", "101")
+                        .header("X-User-Role", "CITIZEN")
                         .param("status", "DONE"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void getMyComplaintsRejectsOfficerRole() throws Exception {
+        mockMvc.perform(get("/api/v1/complaints/my")
+                        .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("FORBIDDEN"));
     }
 
     private Complaint receivedComplaint(

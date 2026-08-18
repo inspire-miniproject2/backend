@@ -63,6 +63,8 @@ class ComplaintResponseCommandControllerTest {
         mockMvc.perform(post("/api/v1/officer/complaints/{complaintId}/response", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new RequestBodyFixture(
                                 "현장 점검과 교통량 분석 결과에 따라 신호 시간을 조정하기로 결정했습니다.",
                                 true
@@ -87,6 +89,8 @@ class ComplaintResponseCommandControllerTest {
         mockMvc.perform(post("/api/v1/officer/complaints/{complaintId}/response", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new RequestBodyFixture(
                                 "현장 점검과 교통량 분석 결과에 따라 신호 시간을 조정하기로 결정했습니다.",
                                 true
@@ -96,6 +100,8 @@ class ComplaintResponseCommandControllerTest {
         mockMvc.perform(post("/api/v1/officer/complaints/{complaintId}/response", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new RequestBodyFixture(
                                 "두 번째 공식 답변은 허용되지 않아야 합니다. 이 요청은 실패해야 합니다.",
                                 false
@@ -113,7 +119,8 @@ class ComplaintResponseCommandControllerTest {
 
         mockMvc.perform(post("/api/v1/officer/complaints/{complaintId}/response", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Id", "201")
+                        .header("X-User-Id", "900")
+                        .header("X-User-Role", "ADMIN")
                         .content(objectMapper.writeValueAsString(new RequestBodyFixture(
                                 "접수 상태에서는 공식 답변을 바로 등록할 수 없으므로 이 요청은 실패해야 합니다.",
                                 false
@@ -133,12 +140,34 @@ class ComplaintResponseCommandControllerTest {
         mockMvc.perform(post("/api/v1/officer/complaints/{complaintId}/response", complaint.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
                         .content(objectMapper.writeValueAsString(new RequestBodyFixture("너무 짧음", false))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
 
         assertThat(complaintResponseRepository.count()).isZero();
+    }
+
+    @Test
+    void registerResponseRejectsDifferentDepartmentOfficer() throws Exception {
+        Complaint complaint = complaintRepository.save(assignedComplaint());
+
+        mockMvc.perform(post("/api/v1/officer/complaints/{complaintId}/response", complaint.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", "202")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "11")
+                        .content(objectMapper.writeValueAsString(new RequestBodyFixture(
+                                "다른 부서 공무원은 답변을 등록할 수 없어야 합니다.",
+                                false
+                        ))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("FORBIDDEN"));
+
+        assertThat(complaintResponseRepository.count()).isZero();
+        verify(complaintEventPublisher, never()).publishComplaintResponseRegistered(any());
     }
 
     private Complaint assignedComplaint() {

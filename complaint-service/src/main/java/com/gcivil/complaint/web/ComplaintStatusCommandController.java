@@ -30,10 +30,18 @@ public class ComplaintStatusCommandController {
     public ResponseEntity<ApiResponse<ChangeComplaintStatusResponse>> changeStatus(
             @PathVariable @Positive(message = "complaintId must be positive") Long complaintId,
             @Valid @RequestBody ChangeComplaintStatusRequest request,
-            @RequestHeader("X-User-Id") @Positive(message = "X-User-Id must be positive") Long changedByUserId
+            @RequestHeader("X-User-Id") @Positive(message = "X-User-Id must be positive") Long changedByUserId,
+            @RequestHeader("X-User-Role") String requesterRole,
+            @RequestHeader(value = "X-Department-Id", required = false) Long departmentId
     ) {
         ChangeComplaintStatusResponse response =
-                complaintStatusCommandService.changeStatus(complaintId, request, changedByUserId);
+                complaintStatusCommandService.changeStatus(
+                        complaintId,
+                        request,
+                        changedByUserId,
+                        requesterRole,
+                        departmentId
+                );
         return ResponseEntity.ok(ApiResponse.success(response, "민원 상태가 변경되었습니다."));
     }
 }

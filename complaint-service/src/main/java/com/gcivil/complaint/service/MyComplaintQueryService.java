@@ -18,20 +18,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyComplaintQueryService {
 
     private final ComplaintRepository complaintRepository;
+    private final UserAccessGuard userAccessGuard;
 
-    public MyComplaintQueryService(ComplaintRepository complaintRepository) {
+    public MyComplaintQueryService(
+            ComplaintRepository complaintRepository,
+            UserAccessGuard userAccessGuard
+    ) {
         this.complaintRepository = complaintRepository;
+        this.userAccessGuard = userAccessGuard;
     }
 
     @Transactional(readOnly = true)
     public MyComplaintListResponse getMyComplaints(
             Long applicantUserId,
+            String requesterRole,
             Integer page,
             Integer size,
             String keyword,
             String categoryCode,
             String status
     ) {
+        userAccessGuard.requireCitizen(requesterRole);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
         ComplaintStatus complaintStatus = parseStatus(status);
         String normalizedKeyword = normalizeKeyword(keyword);
