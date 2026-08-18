@@ -22,3 +22,10 @@ spring:
 eureka:
   client:
     enabled: false
+
+auth:
+  jwt:
+    secret: test-jwt-secret-key-must-be-at-least-32b
+    issuer: minwonon-auth
+    access-token-ttl-seconds: 3600
+    refresh-token-ttl-seconds: 604800

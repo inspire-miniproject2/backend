@@ -9,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "users")
@@ -47,11 +49,38 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", insertable = false, updatable = false)
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    protected User() {
+    }
+
+    public User(
+            String loginId,
+            String passwordHash,
+            String name,
+            String email,
+            String phone,
+            Role role,
+            Long departmentId,
+            boolean emailNotifyAgreed,
+            boolean active
+    ) {
+        this.loginId = loginId;
+        this.passwordHash = passwordHash;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.role = role;
+        this.departmentId = departmentId;
+        this.emailNotifyAgreed = emailNotifyAgreed;
+        this.active = active;
+    }
 
     public Long getId() {
         return id;

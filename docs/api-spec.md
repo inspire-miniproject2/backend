@@ -218,7 +218,7 @@ API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어
     "userId": 101,
     "loginId": "citizen01",
     "role": "CITIZEN",
-    "createdAt": "2026-08-14T09:30:00+09:00"
+    "createdAt": "2026-08-18T19:30:00"
   },
   "message": "회원가입이 완료되었습니다."
 }
@@ -228,7 +228,7 @@ API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어
 | HTTP | error.code | 발생 조건 |
 |---|---|---|
 | 400 | VALIDATION_ERROR | 필수값 누락 또는 형식 오류 |
-| 409 | DUPLICATE_RESOURCE | 이미 사용 중인 loginId |
+| 409 | DUPLICATE_RESOURCE | 이미 사용 중인 loginId 또는 email |
 
 ### 2.2 로그인
 | Method | Endpoint | 인증 | 권한 | 성공 상태 |
@@ -285,7 +285,7 @@ API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어
 ### 2.3 로그아웃
 | Method | Endpoint | 인증 | 권한 | 성공 상태 |
 |---|---|---|---|---|
-| POST | `/api/v1/auth/logout` | Bearer | 로그인 사용자 | 200 OK |
+| POST | `/api/v1/auth/logout` | 없음 | 로그인 사용자 | 200 OK |
 
 현재 사용자의 세션을 종료합니다.
 
@@ -313,13 +313,14 @@ API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어
   "data": {
     "loggedOut": true
   },
-  "message": "로그아웃되었습니다."
+  "message": "로그아웃이 완료되었습니다."
 }
 ```
 
 **Error / 예외**
 | HTTP | error.code | 발생 조건 |
 |---|---|---|
+| 400 | VALIDATION_ERROR | refreshToken 누락 |
 | 401 | INVALID_TOKEN | 유효하지 않은 토큰 |
 
 ---

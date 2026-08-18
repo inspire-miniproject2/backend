@@ -23,6 +23,13 @@ management:
       exposure:
         include: health,info
 
+auth:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-key-to-at-least-32-bytes}
+    issuer: ${JWT_ISSUER:minwonon-auth}
+    access-token-ttl-seconds: ${JWT_ACCESS_TOKEN_TTL_SECONDS:3600}
+    refresh-token-ttl-seconds: ${JWT_REFRESH_TOKEN_TTL_SECONDS:604800}
+
 user:
   internal:
     allowed-callers: ${USER_INTERNAL_ALLOWED_CALLERS:assignment-service,complaint-service,notification-service}
