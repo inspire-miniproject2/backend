@@ -1,16 +1,46 @@
 server:
   port: ${SERVER_PORT:8082}
+
 spring:
   application:
     name: assignment-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:assignmentdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER_CLASS_NAME:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:create-drop}
+    defer-datasource-initialization: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Seoul
+  sql:
+    init:
+      encoding: UTF-8
+      mode: always
+
 eureka:
   client:
+    enabled: ${EUREKA_CLIENT_ENABLED:false}
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+
+assignment:
+  internal:
+    allowed-caller: ${ASSIGNMENT_ALLOWED_CALLER:complaint-service}
+    user-service-caller: ${ASSIGNMENT_USER_SERVICE_CALLER:assignment-service}
