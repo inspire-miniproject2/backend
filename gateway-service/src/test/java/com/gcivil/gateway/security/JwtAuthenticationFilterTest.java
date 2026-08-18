@@ -95,6 +95,18 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    void rejectsAccessTokenWithMissingRequiredClaim() throws Exception {
+        MockServerWebExchange exchange = exchange(
+                "/api/v1/notifications",
+                token("ACCESS", "CITIZEN", Instant.now().plusSeconds(600), false));
+
+        filter.filter(exchange, ignored -> Mono.empty()).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(exchange.getResponse().getBodyAsString().block()).contains("INVALID_TOKEN");
+    }
+
+    @Test
     void permitsPublicPathButRemovesSpoofedHeaders() {
         MockServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.post("/api/v1/auth/login")
@@ -133,19 +145,25 @@ class JwtAuthenticationFilterTest {
     }
 
     private String token(String tokenType, String role, Instant expiresAt) throws Exception {
+        return token(tokenType, role, expiresAt, true);
+    }
+
+    private String token(String tokenType, String role, Instant expiresAt, boolean includeLoginId) throws Exception {
         Instant now = Instant.now();
         Instant issuedAt = expiresAt.isBefore(now) ? expiresAt.minusSeconds(3600) : now.minusSeconds(1);
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
                 .subject("101")
                 .issuer("minwonon-auth")
                 .claim("userId", 101L)
-                .claim("loginId", "admin01")
                 .claim("role", role)
                 .claim("departmentId", 10L)
                 .claim("tokenType", tokenType)
                 .issueTime(Date.from(issuedAt))
-                .expirationTime(Date.from(expiresAt))
-                .build();
+                .expirationTime(Date.from(expiresAt));
+        if (includeLoginId) {
+            builder.claim("loginId", "admin01");
+        }
+        JWTClaimsSet claims = builder.build();
         SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
         jwt.sign(new MACSigner(SECRET.getBytes(StandardCharsets.UTF_8)));
         return jwt.serialize();

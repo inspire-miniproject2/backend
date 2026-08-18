@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private final JwtDecoder jwtDecoder;
     private final ObjectMapper objectMapper;
+    private final Duration clockSkew;
 
     public JwtAuthenticationFilter(GatewaySecurityProperties.JwtProperties properties, ObjectMapper objectMapper) {
         byte[] secret = requireSecret(properties.secret());
@@ -59,8 +61,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                         new SecretKeySpec(secret, "HmacSHA256"))
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
-        JwtTimestampValidator timestampValidator = new JwtTimestampValidator(
-                Duration.ofSeconds(properties.clockSkewSeconds()));
+        this.clockSkew = Duration.ofSeconds(properties.clockSkewSeconds());
+        JwtTimestampValidator timestampValidator = new JwtTimestampValidator(clockSkew);
         OAuth2TokenValidator<Jwt> claimsValidator = this::validateRequiredClaims;
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
                 timestampValidator,
@@ -124,10 +126,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         Object userId = jwt.getClaim("userId");
         String loginId = jwt.getClaimAsString("loginId");
         String role = jwt.getClaimAsString("role");
+        Instant issuedAt = jwt.getIssuedAt();
         boolean valid = userId instanceof Number
                 && String.valueOf(((Number) userId).longValue()).equals(jwt.getSubject())
                 && loginId != null && !loginId.isBlank()
-                && ROLES.contains(role);
+                && ROLES.contains(role)
+                && jwt.hasClaim("departmentId")
+                && issuedAt != null && !issuedAt.isAfter(Instant.now().plus(clockSkew))
+                && jwt.getExpiresAt() != null;
         return valid ? OAuth2TokenValidatorResult.success()
                 : OAuth2TokenValidatorResult.failure(new OAuth2Error(
                 "invalid_token", "Required access token claims are invalid", null));
