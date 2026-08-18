@@ -1,16 +1,28 @@
 server:
   port: ${SERVER_PORT:8084}
+
 spring:
   application:
     name: user-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  jpa:
+    open-in-view: false
+
 eureka:
   client:
+    enabled: ${EUREKA_CLIENT_ENABLED:false}
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+
+user:
+  internal:
+    allowed-callers: ${USER_INTERNAL_ALLOWED_CALLERS:assignment-service,complaint-service,notification-service}

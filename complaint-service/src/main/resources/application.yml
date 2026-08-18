@@ -3,10 +3,15 @@ server:
 spring:
   application:
     name: complaint-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  jpa:
+    open-in-view: false
 eureka:
   client:
+    enabled: ${EUREKA_CLIENT_ENABLED:true}
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
 management:
@@ -14,3 +19,12 @@ management:
     web:
       exposure:
         include: health,info
+clients:
+  assignment-service:
+    url: ${ASSIGNMENT_SERVICE_URL:http://localhost:8082}
+gcivil:
+  kafka:
+    topics:
+      complaint-created: ${KAFKA_COMPLAINT_CREATED_TOPIC:complaint.created.v1}
+      complaint-status-changed: ${KAFKA_COMPLAINT_STATUS_CHANGED_TOPIC:complaint.status.changed.v1}
+      complaint-response-registered: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC:complaint.response.registered.v1}
