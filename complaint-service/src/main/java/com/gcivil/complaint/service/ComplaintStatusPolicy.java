@@ -28,6 +28,20 @@ public class ComplaintStatusPolicy {
         }
     }
 
+    public void validateTransitionAllowed(ComplaintStatus currentStatus, ComplaintStatus newStatus) {
+        if (currentStatus == ComplaintStatus.ASSIGNED && newStatus == ComplaintStatus.IN_PROGRESS) {
+            return;
+        }
+        if (currentStatus == ComplaintStatus.IN_PROGRESS && newStatus == ComplaintStatus.COMPLETED) {
+            return;
+        }
+        throw new ApiException(
+                HttpStatus.CONFLICT,
+                "INVALID_STATUS_TRANSITION",
+                "허용되지 않은 상태 전이입니다."
+        );
+    }
+
     public boolean isAutomaticTransition(ComplaintStatus previousStatus, ComplaintStatus newStatus) {
         return previousStatus == ComplaintStatus.RECEIVED && newStatus == ComplaintStatus.ASSIGNED;
     }
