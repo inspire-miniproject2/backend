@@ -49,7 +49,7 @@ Access Token은 아래 최소 클레임을 포함합니다.
 | `tokenType` | string | Y | `ACCESS` |
 | `iat` | epoch-seconds | Y | 발급 시각 |
 | `exp` | epoch-seconds | Y | 만료 시각 |
-| `iss` | string | N | 발급자 식별자 |
+| `iss` | string | Y | 발급자 식별자, `minwonon-auth` |
 
 Refresh Token은 아래 최소 클레임을 포함합니다.
 
@@ -60,7 +60,7 @@ Refresh Token은 아래 최소 클레임을 포함합니다.
 | `tokenType` | string | Y | `REFRESH` |
 | `iat` | epoch-seconds | Y | 발급 시각 |
 | `exp` | epoch-seconds | Y | 만료 시각 |
-| `iss` | string | N | 발급자 식별자 |
+| `iss` | string | Y | 발급자 식별자, `minwonon-auth` |
 
 ### 1.1.2 Gateway 내부 전달 헤더 규약
 API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어온 동일 이름 헤더를 제거하고 아래 헤더를 내부 서비스로 전달합니다. 각 마이크로서비스는 JWT를 재검증하지 않고 Gateway가 전달한 사용자 메타데이터와 내부 비즈니스 데이터를 결합해 접근 권한을 판단합니다.
@@ -72,6 +72,40 @@ API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어
 | `X-User-Role` | string | Y | JWT의 `role` |
 | `X-Department-Id` | string | N | JWT의 `departmentId`, 값이 없으면 헤더 미전달 |
 | `X-Request-Id` | string | Y | Gateway 생성 요청 추적 ID |
+
+### 1.1.3 JWT 서명 및 검증 계약
+
+| 항목 | 확정값 |
+|---|---|
+| 서명 알고리즘 | `HS256`만 허용 |
+| 서명 키 | `JWT_SECRET` 환경변수의 UTF-8 바이트 |
+| 키 요구사항 | 암호학적으로 안전한 임의 문자열, UTF-8 기준 최소 32바이트 |
+| 발급자 | `JWT_ISSUER`, 기본값 `minwonon-auth` |
+| Access Token 유효시간 | `JWT_ACCESS_TOKEN_TTL_SECONDS`, 기본값 3,600초 |
+| Refresh Token 유효시간 | `JWT_REFRESH_TOKEN_TTL_SECONDS`, 기본값 604,800초 |
+| 허용 시간 오차 | 최대 30초 |
+
+- User Service와 Gateway는 동일한 `JWT_SECRET` 및 `JWT_ISSUER`를 배포 환경의 Secret으로 주입받습니다. 실제 키를 저장소나 문서에 기록하지 않습니다.
+- `JWT_SECRET`을 Base64로 재해석하지 않고 환경변수 문자열의 UTF-8 바이트를 그대로 사용합니다.
+- Gateway는 JWT 헤더의 `alg`가 `HS256`이 아니면 검증 전에 거부합니다.
+- Gateway는 서명, `iss`, `iat`, `exp`, `tokenType` 및 Access Token 필수 claim을 검증합니다.
+- API 요청에는 `tokenType=ACCESS`만 허용하며 Refresh Token이 전달되면 `INVALID_TOKEN`으로 응답합니다.
+- 인증이 필요 없는 경로는 `/api/v1/auth/signup`, `/api/v1/auth/login`, `/api/v1/complaint-categories`, `/api/v1/public-responses/**`입니다. 운영 health 경로의 공개 범위는 배포 정책에서 별도로 제한합니다.
+
+### 1.1.4 Gateway CORS 계약
+
+| 항목 | 로컬 기본값 |
+|---|---|
+| 허용 Origin | `http://localhost:5173` |
+| 환경변수 | `CORS_ALLOWED_ORIGINS` (쉼표로 복수 Origin 구분) |
+| 허용 Method | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS` |
+| 허용 요청 Header | `Authorization`, `Content-Type`, `Accept`, `X-Request-Id` |
+| 노출 응답 Header | `X-Request-Id` |
+| Credential | `false` |
+
+- Origin에 와일드카드(`*`)를 사용하지 않습니다.
+- 개발 프론트엔드 배포 주소가 확정되면 코드 변경 없이 `CORS_ALLOWED_ORIGINS`에 추가합니다.
+- 외부 클라이언트가 보낸 `X-User-Id`, `X-Login-Id`, `X-User-Role`, `X-Department-Id`는 CORS 허용 Header에 포함하지 않으며 Gateway가 제거 후 재생성합니다.
 
 ### 1.2 공통 성공 응답
 ```json

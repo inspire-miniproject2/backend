@@ -29,6 +29,7 @@
 | `tokenType` | string | Y | `ACCESS` |
 | `iat` | epoch-seconds | Y | 발급 시각 |
 | `exp` | epoch-seconds | Y | 만료 시각 |
+| `iss` | string | Y | `minwonon-auth` |
 
 ### 2.2 Refresh Token payload
 
@@ -39,6 +40,7 @@
 | `tokenType` | string | Y | `REFRESH` |
 | `iat` | epoch-seconds | Y | 발급 시각 |
 | `exp` | epoch-seconds | Y | 만료 시각 |
+| `iss` | string | Y | `minwonon-auth` |
 
 ### 2.3 Gateway 내부 전달 헤더
 
@@ -52,7 +54,23 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 | `X-Department-Id` | string | N | JWT의 `departmentId`, 값이 없으면 헤더 미전달 |
 | `X-Request-Id` | string | Y | 요청 추적 ID |
 
-### 2.4 내부 서비스 호출 규칙
+### 2.4 JWT 서명 및 검증
+
+- 서명 알고리즘은 `HS256`만 허용한다.
+- User Service와 Gateway는 동일한 `JWT_SECRET` 문자열의 UTF-8 바이트를 서명 키로 사용한다.
+- `JWT_SECRET`은 UTF-8 기준 최소 32바이트의 암호학적으로 안전한 임의 문자열이어야 한다.
+- issuer는 `JWT_ISSUER`로 주입하며 기본값은 `minwonon-auth`이다.
+- Access Token 유효시간은 기본 3,600초, Refresh Token은 기본 604,800초이다.
+- Gateway의 시간 오차 허용 범위는 최대 30초이며 API 요청에는 `tokenType=ACCESS`만 허용한다.
+
+### 2.5 CORS
+
+- 로컬 허용 Origin은 `http://localhost:5173`이다.
+- 복수 환경 Origin은 `CORS_ALLOWED_ORIGINS` 환경변수로 관리한다.
+- 쿠키 인증을 사용하지 않으므로 credential은 허용하지 않는다.
+- 개발 배포 주소가 확정되면 환경변수에 추가하고 와일드카드 Origin은 사용하지 않는다.
+
+### 2.6 내부 서비스 호출 규칙
 
 - 내부 서비스 간 호출 인증은 `X-Internal-Caller` 헤더 + 내부 네트워크 격리를 전제로 한다.
 - `X-Department-Id` 값이 없으면 빈 문자열을 보내지 않고, 헤더 자체를 생략한다.
