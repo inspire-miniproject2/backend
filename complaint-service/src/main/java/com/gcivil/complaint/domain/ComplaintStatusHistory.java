@@ -68,4 +68,16 @@ public class ComplaintStatusHistory {
     public ComplaintStatus getNewStatus() {
         return newStatus;
     }
+
+    public Long getChangedByUserId() {
+        return changedByUserId;
+    }
+
+    public String getChangeMemo() {
+        return changeMemo;
+    }
+
+    public LocalDateTime getChangedAt() {
+        return changedAt;
+    }
 }

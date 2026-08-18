@@ -565,14 +565,13 @@ multipart/form-data
 |---|---|---|---|---|
 | GET | `/api/v1/public-responses` | 없음 | Public | 200 OK |
 
-공개 답변 목록 화면의 키워드, 민원 분야, 답변 부서, 완료 기간 필터를 지원합니다.
+공개 답변 목록 화면의 키워드, 민원 분야, 완료 기간 필터를 지원합니다.
 
 **Request**
 | 필드 | 타입 | 필수 | 설명 | 검증 |
 |---|---|---|---|---|
 | keyword | string | N | 민원 제목 또는 답변 내용 검색어 | 최대 50자 |
 | categoryCode | String | N | 민원 분야 코드 필터 | 활성 카테고리 코드 |
-| departmentId | long | N | 답변 부서 필터 | 활성 부서 |
 | completedFrom | date | N | 완료 시작일 | yyyy-MM-dd |
 | completedTo | date | N | 완료 종료일 | yyyy-MM-dd |
 
@@ -581,7 +580,6 @@ multipart/form-data
 {
   "keyword": "신호시간",
   "categoryCode": "TRAFFIC",
-  "departmentId": 10,
   "completedFrom": "2026-08-01",
   "completedTo": "2026-08-14"
 }

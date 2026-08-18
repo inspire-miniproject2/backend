@@ -47,6 +47,9 @@ public class Complaint {
     @Column(name = "assigned_department_id")
     private Long assignedDepartmentId;
 
+    @Column(name = "assigned_department_name", length = 100)
+    private String assignedDepartmentName;
+
     @Column(name = "assigned_officer_user_id")
     private Long assignedOfficerUserId;
 
@@ -99,7 +102,8 @@ public class Complaint {
         attachment.attachTo(this);
     }
 
-    public void markAssigned(Long departmentId, Long officerUserId, LocalDateTime assignedAt) {
+    public void markAssigned(String departmentName, Long departmentId, Long officerUserId, LocalDateTime assignedAt) {
+        this.assignedDepartmentName = departmentName;
         this.assignedDepartmentId = departmentId;
         this.assignedOfficerUserId = officerUserId;
         this.assignedAt = assignedAt;
@@ -156,6 +160,10 @@ public class Complaint {
 
     public Long getAssignedDepartmentId() {
         return assignedDepartmentId;
+    }
+
+    public String getAssignedDepartmentName() {
+        return assignedDepartmentName;
     }
 
     public Long getAssignedOfficerUserId() {
