@@ -78,7 +78,7 @@ class ComplaintAttachmentDownloadControllerTest {
                         .param("categoryId", "1")
                         .param("categoryCode", "TRAFFIC")
                         .param("title", "첨부파일 다운로드 테스트")
-                        .param("content", "첨부파일 다운로드를 테스트합니다.")
+                        .param("content", "첨부파일 다운로드 동작을 충분한 길이로 테스트합니다.")
                         .header("X-User-Id", "101"))
                 .andExpect(status().isCreated());
 

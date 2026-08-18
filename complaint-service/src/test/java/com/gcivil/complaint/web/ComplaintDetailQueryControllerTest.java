@@ -55,7 +55,7 @@ class ComplaintDetailQueryControllerTest {
 
     @Test
     void citizenCanReadOwnComplaintDetail() throws Exception {
-        Complaint complaint = complaintRepository.save(complaint());
+        Complaint complaint = complaint();
         complaint.addAttachment(new ComplaintAttachment(
                 "현장사진.jpg",
                 "stored.jpg",
@@ -64,6 +64,7 @@ class ComplaintDetailQueryControllerTest {
                 12345L,
                 LocalDateTime.of(2026, 8, 18, 10, 0)
         ));
+        complaint = complaintRepository.save(complaint);
         complaint.markAssigned("교통정책과", 10L, 201L, LocalDateTime.of(2026, 8, 18, 10, 10));
         complaint.markInProgress(LocalDateTime.of(2026, 8, 18, 10, 20));
         complaintRepository.save(complaint);
