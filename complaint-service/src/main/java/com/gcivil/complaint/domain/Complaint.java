@@ -107,6 +107,17 @@ public class Complaint {
         this.updatedAt = assignedAt;
     }
 
+    public void markInProgress(LocalDateTime changedAt) {
+        this.currentStatus = ComplaintStatus.IN_PROGRESS;
+        this.updatedAt = changedAt;
+    }
+
+    public void markCompleted(LocalDateTime changedAt) {
+        this.currentStatus = ComplaintStatus.COMPLETED;
+        this.completedAt = changedAt;
+        this.updatedAt = changedAt;
+    }
+
     public void touch(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }

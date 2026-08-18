@@ -4,9 +4,11 @@
 
 ## Implemented Scope
 - `POST /api/v1/complaints` multipart 민원 접수
+- `PATCH /api/v1/officer/complaints/{complaintId}/status` 상태 변경
+- `POST /api/v1/officer/complaints/{complaintId}/response` 공식 답변 등록
 - 첨부파일 메타데이터 저장
 - `assignment-service` 동기 자동 배정 호출
-- `complaint.created.v1`, `complaint.status.changed.v1` 트랜잭션 직후 동기 발행
+- `complaint.created.v1`, `complaint.status.changed.v1`, `complaint.response.registered.v1` 트랜잭션 직후 동기 발행
 
 ## Local Run
 - 로컬 DB는 MySQL 컨테이너(`infra/docker-compose.yml`) 기준입니다.
@@ -38,3 +40,6 @@ curl -X POST http://localhost:8081/api/v1/complaints \
   -F "notifyChannels=EMAIL" \
   -F "attachmentFiles=@/path/to/photo.jpg"
 ```
+
+## Postman / Test Examples
+- Postman 예시는 [complaint-service-postman-examples.md](/Users/imhyeon/Projects/minwonon/backend/docs/complaint-service-postman-examples.md) 에 정리했습니다.
