@@ -94,6 +94,13 @@ GET /api/v1/admin/statistics/ping
 ./scripts/start-all.sh
 ```
 
+## 개발 배포 준비
+
+- S3 첨부파일 환경변수와 EC2 IAM Role 규칙: [docs/s3-attachments.md](docs/s3-attachments.md)
+- GHCR 이미지 기반 EC2 배포 절차: [docs/deployment-dev.md](docs/deployment-dev.md)
+- 배포 환경변수 예시: [.env.dev.example](.env.dev.example)
+- 배포용 Compose: [infra/docker-compose.dev.yml](infra/docker-compose.dev.yml)
+
 ## 로컬 포트
 
 | 구성 요소 | 호스트 포트 | 컨테이너 내부 주소 |

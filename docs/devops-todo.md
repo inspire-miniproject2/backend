@@ -12,6 +12,9 @@
 - [x] CI 검사를 단일 Runner로 통합하고 중복 실행 자동 취소
 - [x] 백엔드 소스가 들어오기 전까지 CI를 수동 실행으로 전환
 - [x] 컨테이너 이미지 발행을 필요한 서비스만 선택하는 수동 실행으로 경량화
+- [x] Statistics Service를 포함한 8개 서비스 이미지 발행 목록 구성
+- [x] S3 첨부파일 환경변수와 EC2 최소 권한 IAM 정책 템플릿 구성
+- [x] GHCR 이미지 기반 개발 배포용 Docker Compose 구성
 - [x] 커밋 규칙과 PR 템플릿 구성
 
 ## MSA 실행 골격 완료
@@ -35,7 +38,7 @@
 - [ ] GHCR 이미지 Push 확인
 - [ ] GitHub Environment `dev` 생성
 - [ ] JWT·DB·배포 서버 값을 GitHub Secrets에 등록
-- [ ] 배포 서버 Docker Compose 작성
+- [x] 배포 서버 Docker Compose 작성
 - [ ] SSH 또는 배포 플랫폼 기반 자동 배포 연결
 - [ ] 배포 실패 시 이전 이미지 태그로 롤백
 - [ ] 배포 및 롤백 시연 기록

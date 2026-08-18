@@ -25,7 +25,9 @@ jobs:
           ./scripts/validate-commit-message.sh --subject "$(git log -1 --format='%s')"
 
       - name: Validate Docker Compose
-        run: docker compose --env-file .env.example -f infra/docker-compose.yml -f infra/docker-compose.apps.yml config --quiet
+        run: |
+          docker compose --env-file .env.example -f infra/docker-compose.yml -f infra/docker-compose.apps.yml config --quiet
+          docker compose --env-file .env.dev.example -f infra/docker-compose.yml -f infra/docker-compose.dev.yml config --quiet
 
       - name: Validate shell scripts
         run: bash -n scripts/*.sh .githooks/commit-msg

@@ -4,7 +4,9 @@
 
 # Local secrets
 .env
+.env.*
 !.env.example
+!.env.dev.example
 
 # Java / Gradle
 **/.gradle/
@@ -20,4 +22,3 @@
 
 # Local runtime data
 infra/data/
-
