@@ -6,12 +6,31 @@ The dev deployment pulls immutable service images from GitHub Container Registry
 
 ```text
 GitHub Actions
+  -> develop push triggers Container Images
   -> build eight service images
   -> push GHCR tags: <commit-sha> and latest
+  -> Deploy Development assumes an AWS role through GitHub OIDC
+  -> Systems Manager runs the deployment on EC2 without inbound SSH
   -> EC2 pulls <commit-sha>
   -> Docker Compose starts Kafka, databases, and services
   -> strict health check
+  -> automatic rollback to the previous image tag on failure
 ```
+
+## Automatic deployment prerequisites
+
+The AWS account must provide the following resources:
+
+- GitHub OIDC provider: `token.actions.githubusercontent.com`
+- Deploy role: `GCivilGitHubActionsDeployRole`
+- Trusted repository and branch: `inspire-miniproject2/backend`, `develop`
+- Target managed node: EC2 instance `i-0f1208c667275ae51`
+- EC2 instance role policy: `AmazonSSMManagedInstanceCore`
+- Deploy role permissions: `ssm:SendCommand` for the target instance and
+  `AWS-RunShellScript`, plus read access to the command result
+
+The EC2 instance must appear as `Online` in Systems Manager Fleet Manager.
+Do not expose SSH port 22 to `0.0.0.0/0` for GitHub-hosted runners.
 
 ## Before the first deployment
 
@@ -34,6 +53,25 @@ printf '%s' "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password
 Do not write the token into the repository or `.env.dev`.
 
 ## Deploy
+
+Every push to `develop` builds all service images. After the image workflow
+succeeds, `.github/workflows/deploy-dev.yml` deploys its immutable seven-character
+commit SHA through Systems Manager.
+
+For a manual redeployment or rollback, run the `Deploy Development` workflow
+from the `develop` branch and enter an image tag that already exists in GHCR.
+
+The equivalent command on EC2 is:
+
+```bash
+./scripts/deploy-dev.sh <seven-character-commit-sha>
+```
+
+The script updates `.env.dev`, pulls images, replaces containers, retries the
+strict health check for up to six minutes, and restores the previous image tag
+when deployment fails.
+
+The lower-level manual commands remain available for troubleshooting:
 
 ```bash
 docker compose \
