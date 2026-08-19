@@ -7,17 +7,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:validate}
-    defer-datasource-initialization: true
     show-sql: false
     properties:
       hibernate:
         format_sql: true
         jdbc:
           time_zone: Asia/Seoul
-  sql:
-    init:
-      encoding: UTF-8
-      mode: ${SQL_INIT_MODE:never}
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
 
 logging:
   level:
