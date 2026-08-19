@@ -2,6 +2,7 @@ package com.gcivil.user.web;
 
 import com.gcivil.user.dto.ApiResponse;
 import com.gcivil.user.dto.InternalUserResponse;
+import com.gcivil.user.dto.InternalNotificationPreferenceResponse;
 import com.gcivil.user.service.InternalUserLookupService;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +29,15 @@ public class InternalUserController {
     ) {
         InternalUserResponse response = internalUserLookupService.getUser(userId);
         return ResponseEntity.ok(ApiResponse.success(response, "내부 사용자 정보를 조회했습니다."));
+    }
+
+    @GetMapping("/{userId}/notification-preference")
+    public ResponseEntity<ApiResponse<InternalNotificationPreferenceResponse>> getNotificationPreference(
+            @PathVariable @Positive(message = "userId must be positive") Long userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(
+                internalUserLookupService.getNotificationPreference(userId),
+                "사용자 알림 수신 설정을 조회했습니다."
+        ));
     }
 }

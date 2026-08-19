@@ -4,6 +4,7 @@ import com.gcivil.notification.domain.Notification;
 import com.gcivil.notification.domain.NotificationRepository;
 import com.gcivil.notification.domain.NotificationType;
 import com.gcivil.notification.domain.ProcessedEventRepository;
+import com.gcivil.notification.email.EmailNotificationService;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
@@ -19,7 +20,8 @@ import static org.mockito.Mockito.when;
 class NotificationEventHandlerTest {
     private final NotificationRepository repository = mock(NotificationRepository.class);
     private final ProcessedEventRepository processedEvents = mock(ProcessedEventRepository.class);
-    private final NotificationEventHandler handler = new NotificationEventHandler(repository, processedEvents);
+    private final EmailNotificationService emailService = mock(EmailNotificationService.class);
+    private final NotificationEventHandler handler = new NotificationEventHandler(repository, processedEvents, emailService);
 
     @Test
     void savesInAppStatusNotificationForApplicant() {
@@ -39,6 +41,7 @@ class NotificationEventHandlerTest {
         assertThat(captor.getValue().getUserId()).isEqualTo(501L);
         assertThat(captor.getValue().getComplaintId()).isEqualTo(1001L);
         assertThat(captor.getValue().getType()).isEqualTo(NotificationType.STATUS_CHANGED);
+        verify(emailService).sendStatusChanged(501L, "CIV-2026-000184", "RECEIVED", "ASSIGNED");
     }
 
     @Test
@@ -69,6 +72,7 @@ class NotificationEventHandlerTest {
                 "ComplaintResponseRegistered", "v1", occurredAt, "complaint-service", "1001", payload));
 
         verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(emailService).sendResponseRegistered(501L, "CIV-2026-000184");
         verify(processedEvents).save(org.mockito.ArgumentMatchers.any());
     }
 
@@ -86,5 +90,7 @@ class NotificationEventHandlerTest {
 
         verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
         verify(processedEvents, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(emailService, never()).sendResponseRegistered(
+                org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyString());
     }
 }
