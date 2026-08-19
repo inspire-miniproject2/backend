@@ -388,11 +388,12 @@ API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어
 
 민원 데이터는 최초 RECEIVED 상태로 영속화되며, OpenFeign을 통해 Assignment Service를 호출하여 카테고리 코드 기반의 자동 배정 로직을 수행합니다. 정상 배정 시 ASSIGNED 상태로 전이되나, 배정 서비스 장애 혹은 타임아웃 시에도 데이터 보존을 위해 RECEIVED 상태를 유지합니다. 첨부파일 포함 시에는 `multipart/form-data` 프로토콜을 준수합니다. 알림 서비스는 IN_APP 채널 생성을 원칙으로 하되, EMAIL 채널은 이용자 선택 및 수신 동의 여부를 식별하여 선별적으로 전송합니다.
 
-현재 초기 자동 배정 규칙은 아래 2건만 활성화합니다.
+현재 초기 자동 배정 규칙은 아래 5건을 활성화합니다.
 - `assignmentRuleId=31`: `TRAFFIC(1)` -> `departmentId=10` `교통정책과` -> `officerUserId=201`
 - `assignmentRuleId=32`: `FACILITY(3)` -> `departmentId=20` `도로관리과` -> `officerUserId=202`
-
-`ENVIRONMENT(2)`, `WELFARE(4)`, `ETC(5)`는 현재 초기 자동 배정 규칙이 없으므로 접수 시 `RECEIVED` 상태를 유지합니다.
+- `assignmentRuleId=33`: `ENVIRONMENT(2)` -> `departmentId=30` `환경관리과` -> `officerUserId=203`
+- `assignmentRuleId=34`: `WELFARE(4)` -> `departmentId=40` `복지지원과` -> `officerUserId=204`
+- `assignmentRuleId=35`: `ETC(5)` -> `departmentId=50` `민원총괄과` -> `officerUserId=205`
 
 **Request**
 | 필드 | 타입 | 필수 | 설명 | 검증 |
@@ -1066,9 +1067,9 @@ Complaint Service는 민원 접수 후 Assignment Service의 내부 API를 OpenF
 
 초기 마스터 데이터 기준 카테고리/규칙 ID는 아래와 같이 고정합니다.
 - 카테고리: `1 TRAFFIC`, `2 ENVIRONMENT`, `3 FACILITY`, `4 WELFARE`, `5 ETC`
-- 부서: `10 교통정책과`, `20 도로관리과`
-- 공무원: `201`, `202`
-- 배정 규칙: `31`, `32`
+- 부서: `10 교통정책과`, `20 도로관리과`, `30 환경관리과`, `40 복지지원과`, `50 민원총괄과`
+- 공무원: `201`, `202`, `203`, `204`, `205`
+- 배정 규칙: `31`, `32`, `33`, `34`, `35`
 
 | Method | Endpoint | 인증 | 권한 | 성공 상태 |
 |---|---|---|---|---|
@@ -1108,7 +1109,7 @@ Complaint Service는 민원 접수 후 Assignment Service의 내부 API를 OpenF
 
 > 배정 성공 시 Complaint Service는 `assigned_department_id`, `assigned_officer_user_id`, `assigned_at`를 저장하고 상태를 ASSIGNED로 변경합니다. 배정 규칙이 없어 `assignmentFound=false`이거나 Assignment Service 장애 또는 시간 초과가 발생하면 민원은 삭제하지 않고 RECEIVED 상태로 유지합니다.
 >
-> 초기 활성 규칙은 `31(TRAFFIC -> 10 -> 201)`, `32(FACILITY -> 20 -> 202)`입니다.
+> 초기 활성 규칙은 `31(TRAFFIC -> 10 -> 201)`, `32(FACILITY -> 20 -> 202)`, `33(ENVIRONMENT -> 30 -> 203)`, `34(WELFARE -> 40 -> 204)`, `35(ETC -> 50 -> 205)`입니다.
 
 ### 8.2 Kafka 이벤트 및 실패 처리
 민원의 생성, 상태 변경, 답변 등록 시 complaint-service는 Kafka 이벤트를 발행합니다. notification-service와 statistics-service는 complaint DB를 직접 조회하지 않고, 각자 필요한 이벤트를 구독하여 비동기로 처리합니다.
