@@ -65,7 +65,7 @@ class StatisticsProcessingMetricsQueryTest {
     void returnsAverageProcessingHoursAndDeadlineCounts() {
         DailyStatisticResponse result = service.findDaily(
                 LocalDate.parse("2026-08-15"), LocalDate.parse("2026-08-15"), 10L)
-                .content().getFirst();
+                .content().get(0);
 
         assertThat(result.deadlineApproachingCount()).isEqualTo(1);
         assertThat(result.overdueCount()).isEqualTo(1);
