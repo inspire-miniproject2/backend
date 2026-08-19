@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Primary
 @Component
+@ConditionalOnProperty(prefix = "gcivil.attachment.storage", name = "type", havingValue = "local", matchIfMissing = true)
 public class LocalAttachmentStorage implements AttachmentStorage {
 
     private final AttachmentStorageProperties properties;

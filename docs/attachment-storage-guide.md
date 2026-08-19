@@ -40,8 +40,8 @@
 
 현재 코드 기준:
 - `local` 저장소는 구현되어 있습니다.
-- `s3` 저장소는 아직 미구현입니다.
-- 따라서 `FILE_STORAGE_TYPE=s3` 상태에서 업로드/다운로드를 시도하면 정상 동작하지 않습니다.
+- `s3` 저장소도 구현되어 있습니다.
+- `FILE_STORAGE_TYPE=s3`이면 Complaint Service가 AWS SDK로 S3에 업로드/다운로드를 수행합니다.
 
 ## 4. Local 방식
 
@@ -75,8 +75,8 @@ export ATTACHMENT_LOCAL_ROOT=/tmp/minwonon-attachments
 - 운영 환경에서 로컬 디스크 의존성 제거
 
 ### 현재 상태
-- 운영 문서와 환경 계약은 정리되어 있음
-- 실제 AWS SDK 연동 코드는 아직 없음
+- 운영 문서와 환경 계약, AWS SDK 연동 코드가 모두 준비됨
+- Complaint Service가 권한 확인 후 S3 object를 직접 읽어 스트림으로 반환
 
 ### 운영 시 지켜야 할 점
 - 버킷은 private 유지
@@ -102,8 +102,8 @@ export ATTACHMENT_LOCAL_ROOT=/tmp/minwonon-attachments
 - 첨부파일 다운로드 시:
   - 권한 검사 후 실제 파일 스트림 반환
 
-## 8. 다음 단계 추천
-1. `S3AttachmentStorage` 구현
-2. 업로드 시 `FILE_STORAGE_TYPE=s3` 분기 추가
-3. 다운로드 시 S3 스트림 반환 추가
-4. Postman 예시에 S3 사용 시 주의사항 추가
+## 8. 운영 전 확인사항
+1. `FILE_STORAGE_TYPE=s3` 설정
+2. `S3_ATTACHMENT_BUCKET`, `S3_ATTACHMENT_PREFIX`, `AWS_REGION` 설정
+3. EC2/ECS 역할에 버킷 prefix 권한 부여
+4. 실제 업로드 후 DB `file_path`에 S3 object key가 저장되는지 확인

@@ -36,6 +36,9 @@ gcivil:
     storage:
       type: ${FILE_STORAGE_TYPE:local}
       local-root: ${ATTACHMENT_LOCAL_ROOT:${java.io.tmpdir}/minwonon-attachments}
+      aws-region: ${AWS_REGION:ap-northeast-2}
+      s3-bucket: ${S3_ATTACHMENT_BUCKET:}
+      s3-prefix: ${S3_ATTACHMENT_PREFIX:complaints/}
   kafka:
     topics:
       complaint-created: ${KAFKA_COMPLAINT_CREATED_TOPIC:complaint.created.v1}
