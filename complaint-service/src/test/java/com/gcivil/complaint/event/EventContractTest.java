@@ -25,8 +25,8 @@ class EventContractTest {
         UUID eventId = UUID.fromString("4d46c02f-cce8-4afd-9cfa-14fceb56ae89");
         OffsetDateTime occurredAt = OffsetDateTime.parse("2026-08-15T09:31:00+09:00");
         var payload = new ComplaintStatusChangedPayload(
-                1001L, "CIV-2026-000184", 501L, 10L, "ROAD", "RECEIVED", "ASSIGNED",
-                21L, 9001L, null, occurredAt, null, null,
+                1001L, "CIV-2026-000184", 501L, 3L, "FACILITY", "RECEIVED", "ASSIGNED",
+                20L, 202L, null, occurredAt, null, null,
                 List.of(NotifyChannel.IN_APP, NotifyChannel.EMAIL));
         var event = new EventEnvelope<>(eventId, ComplaintEventTypes.COMPLAINT_STATUS_CHANGED,
                 ComplaintEventTypes.VERSION, occurredAt, ComplaintEventTypes.PRODUCER, "1001", payload);
@@ -38,7 +38,7 @@ class EventContractTest {
         assertThat(restored.eventId()).isEqualTo(event.eventId());
         assertThat(restored.eventType()).isEqualTo(event.eventType());
         assertThat(restored.payload().applicantUserId()).isEqualTo(501L);
-        assertThat(restored.payload().categoryCode()).isEqualTo("ROAD");
+        assertThat(restored.payload().categoryCode()).isEqualTo("FACILITY");
         assertThat(restored.occurredAt().toInstant()).isEqualTo(event.occurredAt().toInstant());
         assertThat(restored.payload().statusChangedAt().toInstant())
                 .isEqualTo(event.payload().statusChangedAt().toInstant());
@@ -50,8 +50,8 @@ class EventContractTest {
     @Test
     void responseVisibilityUsesIsPublicJsonField() throws Exception {
         var payload = new ComplaintResponseRegisteredPayload(
-                1001L, "CIV-2026-000184", 7001L, 501L, 9001L, true,
-                OffsetDateTime.parse("2026-08-15T10:00:00+09:00"), 21L, List.of(NotifyChannel.IN_APP));
+                1001L, "CIV-2026-000184", 7001L, 501L, 202L, true,
+                OffsetDateTime.parse("2026-08-15T10:00:00+09:00"), 20L, List.of(NotifyChannel.IN_APP));
 
         assertThat(objectMapper.readTree(objectMapper.writeValueAsString(payload)).path("isPublic").asBoolean()).isTrue();
     }

@@ -98,8 +98,8 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 {
   "complaintId": 1001,
   "complaintNo": "CIV-2026-000184",
-  "categoryId": 10,
-  "categoryCode": "ROAD",
+  "categoryId": 3,
+  "categoryCode": "FACILITY",
   "applicantUserId": 501,
   "submittedAt": "2026-08-15T09:30:00+09:00"
 }
@@ -119,11 +119,11 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
 ```json
 {
   "assignmentFound": true,
-  "departmentId": 21,
+  "departmentId": 20,
   "departmentName": "도로관리과",
-  "officerUserId": 9001,
-  "officerName": "홍길동",
-  "assignmentRuleId": 301,
+  "officerUserId": 202,
+  "officerName": "도로관리 담당자",
+  "assignmentRuleId": 32,
   "assignedAt": "2026-08-15T09:30:02+09:00"
 }
 ```
@@ -183,8 +183,8 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
   "complaintId": 1001,
   "complaintNo": "CIV-2026-000184",
   "applicantUserId": 501,
-  "categoryId": 10,
-  "categoryCode": "ROAD",
+  "categoryId": 3,
+  "categoryCode": "FACILITY",
   "currentStatus": "RECEIVED",
   "submittedAt": "2026-08-15T09:30:00+09:00",
   "notifyChannels": [
@@ -203,8 +203,8 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
   "previousStatus": "RECEIVED",
   "currentStatus": "ASSIGNED",
   "statusChangedByUserId": null,
-  "assignedDepartmentId": 21,
-  "assignedOfficerUserId": 9001,
+  "assignedDepartmentId": 20,
+  "assignedOfficerUserId": 202,
   "statusChangedAt": "2026-08-15T09:31:00+09:00",
   "notifyChannels": ["IN_APP", "EMAIL"]
 }
@@ -218,10 +218,10 @@ Gateway는 외부 JWT를 검증한 뒤 아래 헤더만 내부 서비스로 전�
   "complaintNo": "CIV-2026-000184",
   "responseId": 7001,
   "applicantUserId": 501,
-  "responderUserId": 9001,
+  "responderUserId": 202,
   "isPublic": true,
   "respondedAt": "2026-08-15T10:00:00+09:00",
-  "assignedDepartmentId": 21,
+  "assignedDepartmentId": 20,
   "notifyChannels": ["IN_APP", "EMAIL"]
 }
 ```

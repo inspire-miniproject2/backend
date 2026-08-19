@@ -55,6 +55,11 @@
       "categoryId": 2,
       "categoryName": "환경",
       "categoryCode": "ENVIRONMENT"
+    },
+    {
+      "categoryId": 3,
+      "categoryName": "건설·시설",
+      "categoryCode": "FACILITY"
     }
   ],
   "message": "카테고리 목록을 조회했습니다."
@@ -98,10 +103,10 @@
         "complaintId": 3,
         "complaintNo": "CIV-2026-000303",
         "title": "보도블록 정비 요청",
-        "categoryCode": "ROAD",
+        "categoryCode": "FACILITY",
         "currentStatus": "COMPLETED",
         "assignedDepartmentName": "도로관리과",
-        "assignedDepartmentId": 12,
+        "assignedDepartmentId": 20,
         "assignedOfficerUserId": 202
       },
       {

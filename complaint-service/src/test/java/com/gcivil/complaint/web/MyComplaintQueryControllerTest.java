@@ -44,6 +44,7 @@ class MyComplaintQueryControllerTest {
         complaintRepository.save(assignedComplaint(
                 "CIV-2026-000302",
                 101L,
+                1L,
                 "TRAFFIC",
                 "횡단보도 보행신호 개선 요청",
                 ComplaintStatus.IN_PROGRESS,
@@ -55,11 +56,12 @@ class MyComplaintQueryControllerTest {
         complaintRepository.save(assignedComplaint(
                 "CIV-2026-000303",
                 101L,
-                "ROAD",
+                3L,
+                "FACILITY",
                 "보도블록 정비 요청",
                 ComplaintStatus.COMPLETED,
                 "도로관리과",
-                12L,
+                20L,
                 202L,
                 LocalDateTime.of(2026, 8, 18, 11, 0)
         ));
@@ -101,6 +103,7 @@ class MyComplaintQueryControllerTest {
         complaintRepository.save(assignedComplaint(
                 "CIV-2026-000402",
                 101L,
+                1L,
                 "TRAFFIC",
                 "신호시간 조정 요청",
                 ComplaintStatus.IN_PROGRESS,
@@ -112,11 +115,12 @@ class MyComplaintQueryControllerTest {
         complaintRepository.save(assignedComplaint(
                 "CIV-2026-000403",
                 101L,
-                "ROAD",
+                3L,
+                "FACILITY",
                 "도로 포트홀 정비 요청",
                 ComplaintStatus.IN_PROGRESS,
                 "도로관리과",
-                12L,
+                20L,
                 202L,
                 LocalDateTime.of(2026, 8, 18, 11, 0)
         ));
@@ -178,6 +182,7 @@ class MyComplaintQueryControllerTest {
     private Complaint assignedComplaint(
             String complaintNo,
             Long applicantUserId,
+            Long categoryId,
             String categoryCode,
             String title,
             ComplaintStatus status,
@@ -189,7 +194,7 @@ class MyComplaintQueryControllerTest {
         Complaint complaint = new Complaint(
                 complaintNo,
                 applicantUserId,
-                1L,
+                categoryId,
                 categoryCode,
                 title,
                 "내용",
