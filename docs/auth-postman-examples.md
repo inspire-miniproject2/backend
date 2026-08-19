@@ -93,6 +93,14 @@
 }
 ```
 
+- 공무원 추가 계정
+```json
+{
+  "loginId": "officer03",
+  "password": "Officer!2026#"
+}
+```
+
 - 관리자
 ```json
 {
