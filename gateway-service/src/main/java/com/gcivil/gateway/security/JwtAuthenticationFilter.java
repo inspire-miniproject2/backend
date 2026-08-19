@@ -127,15 +127,28 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String loginId = jwt.getClaimAsString("loginId");
         String role = jwt.getClaimAsString("role");
         Instant issuedAt = jwt.getIssuedAt();
-        boolean valid = userId instanceof Number
+        boolean commonClaimsValid = userId instanceof Number
                 && String.valueOf(((Number) userId).longValue()).equals(jwt.getSubject())
                 && loginId != null && !loginId.isBlank()
                 && ROLES.contains(role)
-                && jwt.hasClaim("departmentId")
                 && issuedAt != null && !issuedAt.isAfter(Instant.now().plus(clockSkew))
                 && jwt.getExpiresAt() != null;
-        return valid ? OAuth2TokenValidatorResult.success()
-                : OAuth2TokenValidatorResult.failure(new OAuth2Error(
+        if (!commonClaimsValid) {
+            return invalidRequiredClaims();
+        }
+
+        if ("OFFICER".equals(role)) {
+            Object departmentId = jwt.getClaim("departmentId");
+            if (!(departmentId instanceof Number) || ((Number) departmentId).longValue() <= 0) {
+                return invalidRequiredClaims();
+            }
+        }
+
+        return OAuth2TokenValidatorResult.success();
+    }
+
+    private OAuth2TokenValidatorResult invalidRequiredClaims() {
+        return OAuth2TokenValidatorResult.failure(new OAuth2Error(
                 "invalid_token", "Required access token claims are invalid", null));
     }
 

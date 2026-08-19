@@ -107,6 +107,60 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    void permitsCitizenWithoutDepartmentClaim() throws Exception {
+        ServerWebExchange exchange = exchange(
+                "/api/v1/complaints/my",
+                token("ACCESS", "CITIZEN", Instant.now().plusSeconds(600), true, null));
+        AtomicReference<ServerWebExchange> forwarded = new AtomicReference<>();
+
+        filter.filter(exchange, capture(forwarded)).block();
+
+        assertThat(forwarded.get()).isNotNull();
+        HttpHeaders headers = forwarded.get().getRequest().getHeaders();
+        assertThat(headers.getFirst(JwtAuthenticationFilter.USER_ID)).isEqualTo("101");
+        assertThat(headers.getFirst(JwtAuthenticationFilter.USER_ROLE)).isEqualTo("CITIZEN");
+        assertThat(headers.containsKey(JwtAuthenticationFilter.DEPARTMENT_ID)).isFalse();
+    }
+
+    @Test
+    void permitsAdminWithoutDepartmentClaim() throws Exception {
+        ServerWebExchange exchange = exchange(
+                "/api/v1/admin/statistics/daily",
+                token("ACCESS", "ADMIN", Instant.now().plusSeconds(600), true, null));
+        AtomicReference<ServerWebExchange> forwarded = new AtomicReference<>();
+
+        filter.filter(exchange, capture(forwarded)).block();
+
+        assertThat(forwarded.get()).isNotNull();
+        assertThat(forwarded.get().getRequest().getHeaders()
+                .containsKey(JwtAuthenticationFilter.DEPARTMENT_ID)).isFalse();
+    }
+
+    @Test
+    void rejectsOfficerWithoutDepartmentClaim() throws Exception {
+        MockServerWebExchange exchange = exchange(
+                "/api/v1/notifications",
+                token("ACCESS", "OFFICER", Instant.now().plusSeconds(600), true, null));
+
+        filter.filter(exchange, ignored -> Mono.empty()).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(exchange.getResponse().getBodyAsString().block()).contains("INVALID_TOKEN");
+    }
+
+    @Test
+    void rejectsOfficerWithNonPositiveDepartmentId() throws Exception {
+        MockServerWebExchange exchange = exchange(
+                "/api/v1/notifications",
+                token("ACCESS", "OFFICER", Instant.now().plusSeconds(600), true, 0L));
+
+        filter.filter(exchange, ignored -> Mono.empty()).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(exchange.getResponse().getBodyAsString().block()).contains("INVALID_TOKEN");
+    }
+
+    @Test
     void permitsPublicPathButRemovesSpoofedHeaders() {
         MockServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.post("/api/v1/auth/login")
@@ -145,10 +199,20 @@ class JwtAuthenticationFilterTest {
     }
 
     private String token(String tokenType, String role, Instant expiresAt) throws Exception {
-        return token(tokenType, role, expiresAt, true);
+        return token(tokenType, role, expiresAt, true, 10L);
     }
 
     private String token(String tokenType, String role, Instant expiresAt, boolean includeLoginId) throws Exception {
+        return token(tokenType, role, expiresAt, includeLoginId, 10L);
+    }
+
+    private String token(
+            String tokenType,
+            String role,
+            Instant expiresAt,
+            boolean includeLoginId,
+            Long departmentId
+    ) throws Exception {
         Instant now = Instant.now();
         Instant issuedAt = expiresAt.isBefore(now) ? expiresAt.minusSeconds(3600) : now.minusSeconds(1);
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
@@ -156,12 +220,14 @@ class JwtAuthenticationFilterTest {
                 .issuer("minwonon-auth")
                 .claim("userId", 101L)
                 .claim("role", role)
-                .claim("departmentId", 10L)
                 .claim("tokenType", tokenType)
                 .issueTime(Date.from(issuedAt))
                 .expirationTime(Date.from(expiresAt));
         if (includeLoginId) {
             builder.claim("loginId", "admin01");
+        }
+        if (departmentId != null) {
+            builder.claim("departmentId", departmentId);
         }
         JWTClaimsSet claims = builder.build();
         SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
