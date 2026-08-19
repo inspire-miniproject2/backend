@@ -143,6 +143,56 @@ class ComplaintOfficerQueryControllerTest {
     }
 
     @Test
+    void adminGetsAllComplaintsRegardlessOfAssignee() throws Exception {
+        complaintRepository.save(complaint(
+                "CIV-2026-000301",
+                "첫 번째 담당자 민원",
+                ComplaintStatus.ASSIGNED,
+                201L,
+                10L,
+                LocalDateTime.of(2026, 8, 18, 9, 0)
+        ));
+        complaintRepository.save(complaint(
+                "CIV-2026-000302",
+                "두 번째 담당자 민원",
+                ComplaintStatus.IN_PROGRESS,
+                202L,
+                20L,
+                LocalDateTime.of(2026, 8, 18, 10, 0)
+        ));
+        complaintRepository.save(complaint(
+                "CIV-2026-000303",
+                "아직 배정되지 않은 민원",
+                ComplaintStatus.RECEIVED,
+                null,
+                null,
+                LocalDateTime.of(2026, 8, 18, 11, 0)
+        ));
+        given(userServiceClient.getUser(eq(201L), eq("complaint-service"), anyString()))
+                .willReturn(ApiResponse.success(
+                        new InternalUserResponse(201L, "officer201", "김담당", "OFFICER", 10L, true),
+                        "내부 사용자 정보를 조회했습니다."
+                ));
+        given(userServiceClient.getUser(eq(202L), eq("complaint-service"), anyString()))
+                .willReturn(ApiResponse.success(
+                        new InternalUserResponse(202L, "officer202", "이담당", "OFFICER", 20L, true),
+                        "내부 사용자 정보를 조회했습니다."
+                ));
+
+        mockMvc.perform(get("/api/v1/officer/complaints")
+                        .header("X-User-Id", "900")
+                        .header("X-User-Role", "ADMIN"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.summary.newAssigned").value(1))
+                .andExpect(jsonPath("$.data.summary.inProgress").value(1))
+                .andExpect(jsonPath("$.data.summary.completed").value(0))
+                .andExpect(jsonPath("$.data.content.length()").value(3))
+                .andExpect(jsonPath("$.data.content[0].complaintNo").value("CIV-2026-000303"))
+                .andExpect(jsonPath("$.data.content[1].assigneeName").value("이담당"))
+                .andExpect(jsonPath("$.data.content[2].assigneeName").value("김담당"));
+    }
+
+    @Test
     void getAssignedComplaintsRejectsInvalidStatus() throws Exception {
         mockMvc.perform(get("/api/v1/officer/complaints")
                         .header("X-User-Id", "201")

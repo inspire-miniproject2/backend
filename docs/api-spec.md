@@ -735,6 +735,8 @@ multipart/form-data
 | GET | `/api/v1/officer/complaints` | Bearer | OFFICER / ADMIN | 200 OK |
 
 공무원 업무함 목록을 조회합니다. 신규 배정, 처리중, 완료 요약값과 목록을 함께 반환합니다.
+OFFICER는 자신에게 배정된 민원만 조회하며, ADMIN은 담당자 배정 여부와 관계없이 전체 민원을 조회합니다.
+ADMIN 응답의 요약값도 전체 민원을 기준으로 계산합니다.
 
 **Request**
 | 필드 | 타입 | 필수 | 설명 | 검증 |

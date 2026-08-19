@@ -62,18 +62,25 @@ public class ComplaintOfficerQueryService {
             String requestId
     ) {
         userAccessGuard.requireOfficerOrAdmin(requesterRole);
+        boolean admin = "ADMIN".equals(userAccessGuard.normalizeRole(requesterRole));
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
         ComplaintStatus complaintStatus = parseStatus(status);
         String normalizedKeyword = normalizeKeyword(keyword);
 
-        Page<Complaint> complaints = findComplaints(officerUserId, complaintStatus, normalizedKeyword, pageable);
+        Long assignedOfficerUserId = admin ? null : officerUserId;
+        Page<Complaint> complaints = complaintRepository.searchOfficerComplaints(
+                assignedOfficerUserId,
+                complaintStatus,
+                normalizedKeyword,
+                pageable
+        );
         Map<Long, String> assigneeNames = fetchAssigneeNames(complaints, requestId);
 
         return new AssignedComplaintListResponse(
                 new AssignedComplaintListResponse.Summary(
-                        complaintRepository.countByAssignedOfficerUserIdAndCurrentStatus(officerUserId, ComplaintStatus.ASSIGNED),
-                        complaintRepository.countByAssignedOfficerUserIdAndCurrentStatus(officerUserId, ComplaintStatus.IN_PROGRESS),
-                        complaintRepository.countByAssignedOfficerUserIdAndCurrentStatus(officerUserId, ComplaintStatus.COMPLETED)
+                        countByStatus(officerUserId, ComplaintStatus.ASSIGNED, admin),
+                        countByStatus(officerUserId, ComplaintStatus.IN_PROGRESS, admin),
+                        countByStatus(officerUserId, ComplaintStatus.COMPLETED, admin)
                 ),
                 complaints.getContent().stream()
                         .map(complaint -> toSummary(complaint, assigneeNames))
@@ -84,6 +91,12 @@ public class ComplaintOfficerQueryService {
                 complaints.getTotalPages(),
                 complaints.hasNext()
         );
+    }
+
+    private long countByStatus(Long officerUserId, ComplaintStatus status, boolean admin) {
+        return admin
+                ? complaintRepository.countByCurrentStatus(status)
+                : complaintRepository.countByAssignedOfficerUserIdAndCurrentStatus(officerUserId, status);
     }
 
     private Map<Long, String> fetchAssigneeNames(Page<Complaint> complaints, String requestId) {
@@ -98,40 +111,6 @@ public class ComplaintOfficerQueryService {
             assigneeNames.put(officerId, user == null ? null : user.name());
         }
         return assigneeNames;
-    }
-
-    private Page<Complaint> findComplaints(
-            Long officerUserId,
-            ComplaintStatus status,
-            String keyword,
-            Pageable pageable
-    ) {
-        if (status == null && keyword == null) {
-            return complaintRepository.findByAssignedOfficerUserId(officerUserId, pageable);
-        }
-        if (status != null && keyword == null) {
-            return complaintRepository.findByAssignedOfficerUserIdAndCurrentStatus(officerUserId, status, pageable);
-        }
-        if (status == null) {
-            return complaintRepository
-                    .findByAssignedOfficerUserIdAndComplaintNoContainingIgnoreCaseOrAssignedOfficerUserIdAndTitleContainingIgnoreCase(
-                            officerUserId,
-                            keyword,
-                            officerUserId,
-                            keyword,
-                            pageable
-                    );
-        }
-        return complaintRepository
-                .findByAssignedOfficerUserIdAndCurrentStatusAndComplaintNoContainingIgnoreCaseOrAssignedOfficerUserIdAndCurrentStatusAndTitleContainingIgnoreCase(
-                        officerUserId,
-                        status,
-                        keyword,
-                        officerUserId,
-                        status,
-                        keyword,
-                        pageable
-                );
     }
 
     private AssignedComplaintListResponse.AssignedComplaintSummary toSummary(
