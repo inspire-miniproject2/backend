@@ -27,7 +27,7 @@ class ComplaintKafkaProducerTest {
                 .thenReturn(new CompletableFuture<>());
         var producer = new ComplaintKafkaProducer(kafkaTemplate);
         var payload = new ComplaintCreatedPayload(
-                1001L, "CIV-2026-000184", 501L, 10L, "ROAD", "RECEIVED",
+                1001L, "CIV-2026-000184", 501L, 3L, "FACILITY", "RECEIVED",
                 OffsetDateTime.parse("2026-08-15T09:30:00+09:00"), List.of(NotifyChannel.IN_APP));
         var message = new ComplaintEventMessage<>(
                 UUID.fromString("4d46c02f-cce8-4afd-9cfa-14fceb56ae89"), "complaint.created.v1",

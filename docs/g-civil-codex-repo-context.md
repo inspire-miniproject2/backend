@@ -449,8 +449,8 @@ Request 예시:
 {
   "complaintId": 1001,
   "complaintNo": "CIVIL-20260815-0001",
-  "categoryId": 10,
-  "categoryCode": "ROAD",
+  "categoryId": 3,
+  "categoryCode": "FACILITY",
   "applicantUserId": 501,
   "submittedAt": "2026-08-15T09:30:00Z"
 }
@@ -461,11 +461,11 @@ Request 예시:
 ```json
 {
   "assignmentFound": true,
-  "departmentId": 21,
+  "departmentId": 20,
   "departmentName": "도로관리과",
-  "officerUserId": 9001,
-  "officerName": "홍길동",
-  "assignmentRuleId": 301,
+  "officerUserId": 202,
+  "officerName": "도로관리 담당자",
+  "assignmentRuleId": 32,
   "assignedAt": "2026-08-15T09:30:02Z"
 }
 ```
@@ -764,4 +764,3 @@ Codex가 추측해서 결정하지 않는다.
 4. Spring Boot / Spring Cloud 정확한 버전 조합
 5. 운영 배포 환경 및 registry
 6. Backend A/B의 최종 서비스 구현 ownership — 계약 문서만으로는 일부만 확인 가능
-
