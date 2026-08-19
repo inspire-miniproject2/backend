@@ -195,6 +195,15 @@ services:
       KAFKA_COMPLAINT_STATUS_CHANGED_DLT: ${KAFKA_COMPLAINT_STATUS_CHANGED_DLT:-complaint.status.changed.v1.dlt}
       KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC:-complaint.response.registered.v1}
       KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT:-complaint.response.registered.v1.dlt}
+      USER_SERVICE_URL: http://user-service:8084
+      EMAIL_NOTIFICATIONS_ENABLED: ${EMAIL_NOTIFICATIONS_ENABLED:-false}
+      MAIL_HOST: ${MAIL_HOST:-localhost}
+      MAIL_PORT: ${MAIL_PORT:-1025}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-false}
+      MAIL_STARTTLS_ENABLED: ${MAIL_STARTTLS_ENABLED:-false}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@minwonon.local}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
     networks: [g-civil-network]
 

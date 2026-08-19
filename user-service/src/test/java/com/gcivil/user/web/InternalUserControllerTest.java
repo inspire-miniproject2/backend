@@ -44,6 +44,17 @@ class InternalUserControllerTest {
     }
 
     @Test
+    void returnsEmailNotificationPreferenceForInternalCaller() throws Exception {
+        mockMvc.perform(get("/api/v1/internal/users/201/notification-preference")
+                        .header("X-Internal-Caller", "notification-service"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.userId").value(201))
+                .andExpect(jsonPath("$.data.email").value("officer01@gcivil.local"))
+                .andExpect(jsonPath("$.data.emailNotifyAgreed").value(true))
+                .andExpect(jsonPath("$.data.isActive").value(true));
+    }
+
+    @Test
     void rejectsRequestWithoutInternalCallerHeader() throws Exception {
         mockMvc.perform(get("/api/v1/internal/users/201"))
                 .andExpect(status().isForbidden())

@@ -155,6 +155,9 @@ Kafka Topic을 확인하려면 다음 명령을 사용합니다.
 - Complaint Service는 Assignment Service를 OpenFeign으로 호출합니다.
 - Complaint Service는 DB commit 이후 `complaint.created.v1`, `complaint.status.changed.v1`, `complaint.response.registered.v1` 이벤트를 발행합니다.
 - Notification Service는 이벤트를 소비하고 자체 DB에 알림을 저장합니다.
+- 이벤트에 `EMAIL` 채널이 포함되고 사용자가 회원가입 시 이메일 알림에 동의한 경우,
+  Notification Service는 User Service의 내부 수신설정 API를 확인한 뒤 SMTP 이메일을 발송합니다.
+  로컬 기본값은 비활성화이며 `.env.example`의 메일 환경변수를 설정해야 활성화됩니다.
 - 서비스는 다른 서비스의 DB를 직접 조회하거나 Foreign Key로 연결하지 않습니다.
 - 서비스 간 관계는 `userId`, `complaintId`, `departmentId`만 공유합니다.
 
