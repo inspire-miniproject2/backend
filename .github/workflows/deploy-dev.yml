@@ -80,11 +80,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          parameters="$(jq -n --arg image_tag "$IMAGE_TAG" '{
+          remote_script="set -Eeuo pipefail; git -C /home/ubuntu/g-civil-msa pull --ff-only origin develop; exec /home/ubuntu/g-civil-msa/scripts/deploy-dev.sh $IMAGE_TAG"
+          parameters="$(jq -n --arg command "$remote_script" '{
             commands: [
-              "set -euo pipefail",
-              "sudo -u ubuntu -H git -C /home/ubuntu/g-civil-msa pull --ff-only origin develop",
-              ("sudo -u ubuntu -H /home/ubuntu/g-civil-msa/scripts/deploy-dev.sh " + $image_tag)
+              ("sudo -u ubuntu -H bash -lc " + ($command | @sh))
             ]
           }')"
 
