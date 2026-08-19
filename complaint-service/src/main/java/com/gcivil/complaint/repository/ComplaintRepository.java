@@ -14,11 +14,11 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
 
     long countByAssignedOfficerUserIdAndCurrentStatus(Long assignedOfficerUserId, ComplaintStatus currentStatus);
 
+    long countByCurrentStatus(ComplaintStatus currentStatus);
+
     long countByApplicantUserId(Long applicantUserId);
 
     long countByApplicantUserIdAndCurrentStatus(Long applicantUserId, ComplaintStatus currentStatus);
-
-    Page<Complaint> findByAssignedOfficerUserId(Long assignedOfficerUserId, Pageable pageable);
 
     @Query("""
             select c from Complaint c
@@ -39,27 +39,21 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
             Pageable pageable
     );
 
-    Page<Complaint> findByAssignedOfficerUserIdAndCurrentStatus(
-            Long assignedOfficerUserId,
-            ComplaintStatus currentStatus,
+    @Query("""
+            select c from Complaint c
+            where (:assignedOfficerUserId is null or c.assignedOfficerUserId = :assignedOfficerUserId)
+              and (:status is null or c.currentStatus = :status)
+              and (
+                    :keyword is null
+                    or lower(c.complaintNo) like lower(concat('%', :keyword, '%'))
+                    or lower(c.title) like lower(concat('%', :keyword, '%'))
+              )
+            """)
+    Page<Complaint> searchOfficerComplaints(
+            @Param("assignedOfficerUserId") Long assignedOfficerUserId,
+            @Param("status") ComplaintStatus status,
+            @Param("keyword") String keyword,
             Pageable pageable
     );
 
-    Page<Complaint> findByAssignedOfficerUserIdAndComplaintNoContainingIgnoreCaseOrAssignedOfficerUserIdAndTitleContainingIgnoreCase(
-            Long assignedOfficerUserId,
-            String complaintNoKeyword,
-            Long assignedOfficerUserIdForTitle,
-            String titleKeyword,
-            Pageable pageable
-    );
-
-    Page<Complaint> findByAssignedOfficerUserIdAndCurrentStatusAndComplaintNoContainingIgnoreCaseOrAssignedOfficerUserIdAndCurrentStatusAndTitleContainingIgnoreCase(
-            Long assignedOfficerUserId,
-            ComplaintStatus currentStatus,
-            String complaintNoKeyword,
-            Long assignedOfficerUserIdForTitle,
-            ComplaintStatus currentStatusForTitle,
-            String titleKeyword,
-            Pageable pageable
-    );
 }
