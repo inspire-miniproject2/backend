@@ -91,6 +91,7 @@ check_http "eureka statistics" "http://localhost:${DISCOVERY_PORT:-8761}/eureka/
 echo
 echo "Gateway routes"
 check_http "gateway -> complaint" "http://localhost:${GATEWAY_PORT:-8080}/api/v1/complaints/ping"
+check_http "gateway -> complaint categories" "http://localhost:${GATEWAY_PORT:-8080}/api/v1/complaint-categories"
 check_http "gateway -> notification" "http://localhost:${GATEWAY_PORT:-8080}/api/v1/notifications/ping"
 check_http "gateway -> statistics" "http://localhost:${GATEWAY_PORT:-8080}/api/v1/admin/statistics/ping"
 
