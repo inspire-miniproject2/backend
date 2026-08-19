@@ -1,6 +1,7 @@
 package com.gcivil.complaint.service;
 
 import com.gcivil.complaint.client.dto.AssignmentResponse;
+import com.gcivil.complaint.config.AttachmentStorageProperties;
 import com.gcivil.complaint.domain.Complaint;
 import com.gcivil.complaint.domain.ComplaintAttachment;
 import com.gcivil.complaint.domain.ComplaintStatus;
@@ -34,6 +35,7 @@ public class ComplaintCommandService {
     private final AssignmentIntegrationService assignmentIntegrationService;
     private final ComplaintEventPublisher complaintEventPublisher;
     private final AttachmentStorage attachmentStorage;
+    private final AttachmentStorageProperties attachmentStorageProperties;
     private final UserAccessGuard userAccessGuard;
 
     public ComplaintCommandService(
@@ -43,6 +45,7 @@ public class ComplaintCommandService {
             AssignmentIntegrationService assignmentIntegrationService,
             ComplaintEventPublisher complaintEventPublisher,
             AttachmentStorage attachmentStorage,
+            AttachmentStorageProperties attachmentStorageProperties,
             UserAccessGuard userAccessGuard
     ) {
         this.complaintRepository = complaintRepository;
@@ -51,6 +54,7 @@ public class ComplaintCommandService {
         this.assignmentIntegrationService = assignmentIntegrationService;
         this.complaintEventPublisher = complaintEventPublisher;
         this.attachmentStorage = attachmentStorage;
+        this.attachmentStorageProperties = attachmentStorageProperties;
         this.userAccessGuard = userAccessGuard;
     }
 
@@ -159,7 +163,7 @@ public class ComplaintCommandService {
             extension = originalFilename.substring(extensionIndex);
         }
         String storedFilename = UUID.randomUUID() + extension.toLowerCase(Locale.ROOT);
-        String filePath = "complaints/%s/%s".formatted(complaintNo, storedFilename);
+        String filePath = attachmentStorageProperties.buildStoredPath(complaintNo, storedFilename);
         return new ComplaintAttachment(
                 originalFilename,
                 storedFilename,

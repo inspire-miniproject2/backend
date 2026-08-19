@@ -23,6 +23,13 @@ AWS access key and secret key must not be stored in `.env`, GitHub Secrets, sour
 
 The current API contract returns a file stream from Complaint Service. Browser-direct upload and presigned URL CORS rules are therefore outside the current scope.
 
+## Current implementation status
+
+- `complaint-service` selects storage by `FILE_STORAGE_TYPE`.
+- `FILE_STORAGE_TYPE=s3` uses AWS SDK v2 and the default credential chain.
+- Attachment metadata stores only the S3 object key in `complaint_attachments.file_path`.
+- Download still goes through Complaint Service after authorization checks.
+
 ## EC2 IAM role
 
 1. Copy `infra/aws/iam/complaint-s3-policy.json.example`.
