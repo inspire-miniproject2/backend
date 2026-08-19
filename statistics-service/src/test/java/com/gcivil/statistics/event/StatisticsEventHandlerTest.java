@@ -3,10 +3,12 @@ package com.gcivil.statistics.event;
 import com.gcivil.statistics.domain.ComplaintStatisticSource;
 import com.gcivil.statistics.domain.StatisticsAggregationRepository;
 import com.gcivil.statistics.domain.ProcessedEventRepository;
+import com.gcivil.statistics.config.StatisticsMetricsProperties;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,7 +21,9 @@ import static org.mockito.Mockito.when;
 class StatisticsEventHandlerTest {
     private final StatisticsAggregationRepository repository = mock(StatisticsAggregationRepository.class);
     private final ProcessedEventRepository processedEvents = mock(ProcessedEventRepository.class);
-    private final StatisticsEventHandler handler = new StatisticsEventHandler(repository, processedEvents);
+    private final StatisticsMetricsProperties metricsProperties = new StatisticsMetricsProperties();
+    private final StatisticsEventHandler handler = new StatisticsEventHandler(
+            repository, processedEvents, metricsProperties);
 
     @Test
     void createsSourceAndReceivedBucket() {
@@ -33,7 +37,8 @@ class StatisticsEventHandlerTest {
         handler.handleCreated(event);
 
         verify(repository).insertSource(new ComplaintStatisticSource(
-                1001L, LocalDate.parse("2026-08-15"), 0L, "ROAD", "RECEIVED"),
+                1001L, LocalDate.parse("2026-08-15"), 0L, "ROAD", "RECEIVED",
+                submittedAt.toLocalDateTime(), submittedAt.toLocalDateTime().plusDays(7), null),
                 submittedAt.toLocalDateTime());
         verify(repository).changeCount(LocalDate.parse("2026-08-15"), 0L, "ROAD", "RECEIVED", 1,
                 submittedAt.toLocalDateTime());
@@ -44,7 +49,9 @@ class StatisticsEventHandlerTest {
     void movesCountFromPreviousStatusAndDepartmentToNewBucket() {
         OffsetDateTime changedAt = OffsetDateTime.parse("2026-08-15T09:31:00+09:00");
         when(repository.findSource(1001L)).thenReturn(Optional.of(new ComplaintStatisticSource(
-                1001L, LocalDate.parse("2026-08-15"), 0L, "ROAD", "RECEIVED")));
+                1001L, LocalDate.parse("2026-08-15"), 0L, "ROAD", "RECEIVED",
+                LocalDateTime.parse("2026-08-15T09:30:00"),
+                LocalDateTime.parse("2026-08-22T09:30:00"), null)));
         var payload = new ComplaintStatusChangedPayload(
                 1001L, "CIV-2026-000184", 501L, 10L, "ROAD", "RECEIVED", "ASSIGNED",
                 21L, 9001L, null, changedAt, null, null, List.of(NotifyChannel.IN_APP));
@@ -58,8 +65,27 @@ class StatisticsEventHandlerTest {
                 changedAt.toLocalDateTime());
         order.verify(repository).changeCount(LocalDate.parse("2026-08-15"), 21L, "ROAD", "ASSIGNED", 1,
                 changedAt.toLocalDateTime());
-        order.verify(repository).updateSource(1001L, 21L, "ASSIGNED", changedAt.toLocalDateTime());
+        order.verify(repository).updateSource(1001L, 21L, "ASSIGNED", null, changedAt.toLocalDateTime());
         verify(processedEvents).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void recordsCompletionTimestampForProcessingMetrics() {
+        OffsetDateTime changedAt = OffsetDateTime.parse("2026-08-16T12:30:00+09:00");
+        when(repository.findSource(1001L)).thenReturn(Optional.of(new ComplaintStatisticSource(
+                1001L, LocalDate.parse("2026-08-15"), 21L, "ROAD", "IN_PROGRESS",
+                LocalDateTime.parse("2026-08-15T09:30:00"),
+                LocalDateTime.parse("2026-08-22T09:30:00"), null)));
+        var payload = new ComplaintStatusChangedPayload(
+                1001L, "CIV-2026-000184", 501L, 10L, "ROAD", "IN_PROGRESS", "COMPLETED",
+                21L, 9001L, 9001L, changedAt, null, changedAt,
+                List.of(NotifyChannel.IN_APP));
+
+        handler.handleStatusChanged(new EventEnvelope<>(UUID.randomUUID(), "ComplaintStatusChanged", "v1",
+                changedAt, "complaint-service", "1001", payload));
+
+        verify(repository).updateSource(1001L, 21L, "COMPLETED",
+                changedAt.toLocalDateTime(), changedAt.toLocalDateTime());
     }
 
     @Test

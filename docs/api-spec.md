@@ -993,6 +993,10 @@ multipart/form-data
 
 Statistics Service가 Kafka 이벤트를 활용하여 DAILY_COMPLAINT_STATISTICS 테이블에 산출한 부서별 일별 지표를 조회합니다. 성능을 위해 Complaint DB에 직접 접근하지 않고 집계된 통계 데이터를 사용합니다.
 
+처리기한 지표는 Complaint 도메인의 개별 마감기한 필드가 아니라 접수 시각에
+`STATISTICS_PROCESSING_DEADLINE_DAYS`를 더한 통계용 SLA를 기준으로 계산합니다.
+기한 임박 범위는 `STATISTICS_DEADLINE_APPROACHING_DAYS`로 설정합니다.
+
 **Request**
 | 필드 | 타입 | 필수 | 설명 | 검증 |
 |---|---|---|---|---|
@@ -1019,9 +1023,9 @@ Statistics Service가 Kafka 이벤트를 활용하여 DAILY_COMPLAINT_STATISTICS
 | data.content[].assignedStatusCount | number | ASSIGNED 상태 건수 |
 | data.content[].inProgressStatusCount | number | IN_PROGRESS 상태 건수 |
 | data.content[].completedStatusCount | number | COMPLETED 상태 건수 |
-| data.content[].deadlineApproachingCount | number | 기한 임박 건수 |
-| data.content[].overdueCount | number | 기한 초과 건수 |
-| data.content[].averageProcessingHours | decimal | totalProcessingMinutes / newCompletedCount 기반 평균 처리 시간 |
+| data.content[].deadlineApproachingCount | number | 미완료 민원 중 설정된 임박 기준 이내 도래 건수 |
+| data.content[].overdueCount | number | 미완료 민원 중 처리기한 초과 건수 |
+| data.content[].averageProcessingHours | decimal | submittedAt부터 COMPLETED statusChangedAt까지 평균 시간 |
 
 **Success Example**
 ```json

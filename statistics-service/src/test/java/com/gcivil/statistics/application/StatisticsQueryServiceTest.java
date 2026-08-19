@@ -4,12 +4,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
+import java.time.Clock;
+import com.gcivil.statistics.config.StatisticsMetricsProperties;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 class StatisticsQueryServiceTest {
-    private final StatisticsQueryService service = new StatisticsQueryService(mock(JdbcTemplate.class));
+    private final StatisticsQueryService service = new StatisticsQueryService(
+            mock(JdbcTemplate.class), Clock.systemUTC(), new StatisticsMetricsProperties());
 
     @Test
     void rejectsReversedDateRange() {

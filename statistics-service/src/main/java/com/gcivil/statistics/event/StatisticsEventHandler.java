@@ -4,6 +4,7 @@ import com.gcivil.statistics.domain.ComplaintStatisticSource;
 import com.gcivil.statistics.domain.StatisticsAggregationRepository;
 import com.gcivil.statistics.domain.ProcessedEvent;
 import com.gcivil.statistics.domain.ProcessedEventRepository;
+import com.gcivil.statistics.config.StatisticsMetricsProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,11 +14,14 @@ public class StatisticsEventHandler {
 
     private final StatisticsAggregationRepository repository;
     private final ProcessedEventRepository processedEventRepository;
+    private final StatisticsMetricsProperties metricsProperties;
 
     public StatisticsEventHandler(StatisticsAggregationRepository repository,
-                                  ProcessedEventRepository processedEventRepository) {
+                                  ProcessedEventRepository processedEventRepository,
+                                  StatisticsMetricsProperties metricsProperties) {
         this.repository = repository;
         this.processedEventRepository = processedEventRepository;
+        this.metricsProperties = metricsProperties;
     }
 
     @Transactional
@@ -26,9 +30,11 @@ public class StatisticsEventHandler {
             return;
         }
         var payload = event.payload();
+        var submittedAt = payload.submittedAt().toLocalDateTime();
         var source = new ComplaintStatisticSource(
                 payload.complaintId(), payload.submittedAt().toLocalDate(), UNASSIGNED_DEPARTMENT,
-                payload.categoryCode(), payload.currentStatus());
+                payload.categoryCode(), payload.currentStatus(), submittedAt,
+                submittedAt.plusDays(metricsProperties.getProcessingDeadlineDays()), null);
         repository.insertSource(source, event.occurredAt().toLocalDateTime());
         repository.changeCount(source.statisticDate(), source.assignedDepartmentId(), source.categoryCode(),
                 source.currentStatus(), 1, event.occurredAt().toLocalDateTime());
@@ -57,7 +63,10 @@ public class StatisticsEventHandler {
                 source.currentStatus(), -1, changedAt);
         repository.changeCount(source.statisticDate(), newDepartmentId, source.categoryCode(),
                 payload.currentStatus(), 1, changedAt);
-        repository.updateSource(payload.complaintId(), newDepartmentId, payload.currentStatus(), changedAt);
+        var completedAt = "COMPLETED".equals(payload.currentStatus())
+                ? payload.statusChangedAt().toLocalDateTime() : source.completedAt();
+        repository.updateSource(payload.complaintId(), newDepartmentId, payload.currentStatus(),
+                completedAt, changedAt);
         markProcessed(event);
     }
 

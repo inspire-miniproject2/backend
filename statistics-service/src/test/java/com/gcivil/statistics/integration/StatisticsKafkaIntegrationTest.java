@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 }, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
 @Sql(statements = {
         "CREATE TABLE IF NOT EXISTS complaint_statistics (statistic_date DATE NOT NULL, department_id BIGINT NOT NULL, category_code VARCHAR(50) NOT NULL, status VARCHAR(30) NOT NULL, complaint_count BIGINT NOT NULL DEFAULT 0, updated_at TIMESTAMP NOT NULL, PRIMARY KEY (statistic_date, department_id, category_code, status))",
-        "CREATE TABLE IF NOT EXISTS complaint_statistic_sources (complaint_id BIGINT NOT NULL PRIMARY KEY, statistic_date DATE NOT NULL, assigned_department_id BIGINT NOT NULL, category_code VARCHAR(50) NOT NULL, current_status VARCHAR(30) NOT NULL, updated_at TIMESTAMP NOT NULL)"
+        "CREATE TABLE IF NOT EXISTS complaint_statistic_sources (complaint_id BIGINT NOT NULL PRIMARY KEY, statistic_date DATE NOT NULL, assigned_department_id BIGINT NOT NULL, category_code VARCHAR(50) NOT NULL, current_status VARCHAR(30) NOT NULL, submitted_at TIMESTAMP, due_at TIMESTAMP, completed_at TIMESTAMP, updated_at TIMESTAMP NOT NULL)"
 })
 @DirtiesContext
 class StatisticsKafkaIntegrationTest {
