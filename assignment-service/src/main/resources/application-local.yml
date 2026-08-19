@@ -6,13 +6,10 @@ spring:
     driver-class-name: ${DB_DRIVER_CLASS_NAME:com.mysql.cj.jdbc.Driver}
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:create}
-    defer-datasource-initialization: true
+      ddl-auto: ${JPA_DDL_AUTO:validate}
     show-sql: true
-  sql:
-    init:
-      encoding: UTF-8
-      mode: ${SQL_INIT_MODE:always}
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
 
 logging:
   level:

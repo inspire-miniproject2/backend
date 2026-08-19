@@ -14,5 +14,6 @@
 
 ## 로컬 실행 메모
 - 기본 포트: `8082`
-- 기본 프로필은 H2 메모리 DB로 기동됩니다.
-- 샘플 데이터는 `src/main/resources/data.sql`로 적재됩니다.
+- `local`, `dev` 프로필은 MySQL과 Flyway migration을 사용합니다.
+- 자동화 테스트의 `test` 프로필만 H2와 `src/test/resources/data.sql`을 사용합니다.
+- 이미 적용된 Flyway migration은 수정하지 않고 후속 변경을 새 버전 파일로 추가합니다.
