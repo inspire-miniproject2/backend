@@ -922,6 +922,7 @@ ADMIN 응답의 요약값도 전체 민원을 기준으로 계산합니다.
 | data.unreadCount | number | 미읽음 개수 |
 | data.content[].notificationId | long | 알림 ID |
 | data.content[].message | string | 알림 메시지 |
+| data.content[].createdAt | datetime | 알림 생성 시각(ISO 8601, 한국 표준시 `+09:00`) |
 
 **Success Example**
 ```json
@@ -932,7 +933,8 @@ ADMIN 응답의 요약값도 전체 민원을 기준으로 계산합니다.
     "content": [
       {
         "notificationId": 9001,
-        "message": "상태가 완료로 변경되었습니다."
+        "message": "상태가 완료로 변경되었습니다.",
+        "createdAt": "2026-08-20T14:33:00+09:00"
       }
     ]
   },
@@ -967,7 +969,7 @@ ADMIN 응답의 요약값도 전체 민원을 기준으로 계산합니다.
 **Response**
 | 필드 | 타입 | 설명 |
 |---|---|---|
-| data.readAt | datetime | 읽음 처리 시각 |
+| data.readAt | datetime | 읽음 처리 시각(ISO 8601, 한국 표준시 `+09:00`) |
 
 **Success Example**
 ```json

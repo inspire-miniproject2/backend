@@ -9,6 +9,8 @@ import com.gcivil.notification.email.EmailNotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneOffset;
+
 @Service
 public class NotificationEventHandler {
     private final NotificationRepository notificationRepository;
@@ -68,6 +70,7 @@ public class NotificationEventHandler {
 
     private void markProcessed(EventEnvelope<?> event) {
         processedEventRepository.save(new ProcessedEvent(
-                event.eventId(), event.eventType(), event.occurredAt().toLocalDateTime()));
+                event.eventId(), event.eventType(),
+                event.occurredAt().withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime()));
     }
 }
