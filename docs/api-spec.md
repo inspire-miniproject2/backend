@@ -390,7 +390,7 @@ API Gateway는 외부 인입 요청의 JWT를 검증한 뒤, 외부에서 들어
 
 현재 초기 자동 배정 규칙은 아래 5건을 활성화합니다.
 - `assignmentRuleId=31`: `TRAFFIC(1)` -> `departmentId=10` `교통정책과` -> `officerUserId=201`
-- `assignmentRuleId=32`: `FACILITY(3)` -> `departmentId=20` `도로관리과` -> `officerUserId=202`
+- `assignmentRuleId=32`: `FACILITY(3)` -> `departmentId=20` `시설관리과` -> `officerUserId=202`
 - `assignmentRuleId=33`: `ENVIRONMENT(2)` -> `departmentId=30` `환경관리과` -> `officerUserId=203`
 - `assignmentRuleId=34`: `WELFARE(4)` -> `departmentId=40` `복지지원과` -> `officerUserId=204`
 - `assignmentRuleId=35`: `ETC(5)` -> `departmentId=50` `민원총괄과` -> `officerUserId=205`
@@ -1069,7 +1069,7 @@ Complaint Service는 민원 접수 후 Assignment Service의 내부 API를 OpenF
 
 초기 마스터 데이터 기준 카테고리/규칙 ID는 아래와 같이 고정합니다.
 - 카테고리: `1 TRAFFIC`, `2 ENVIRONMENT`, `3 FACILITY`, `4 WELFARE`, `5 ETC`
-- 부서: `10 교통정책과`, `20 도로관리과`, `30 환경관리과`, `40 복지지원과`, `50 민원총괄과`
+- 부서: `10 교통정책과`, `20 시설관리과`, `30 환경관리과`, `40 복지지원과`, `50 민원총괄과`
 - 공무원: `201`, `202`, `203`, `204`, `205`
 - 배정 규칙: `31`, `32`, `33`, `34`, `35`
 

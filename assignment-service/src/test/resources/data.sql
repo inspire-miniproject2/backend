@@ -1,7 +1,7 @@
 INSERT INTO departments (department_id, department_name, is_active, created_at, updated_at)
 VALUES
     (10, '교통정책과', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (20, '도로관리과', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    (20, '시설관리과', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (30, '환경관리과', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (40, '복지지원과', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (50, '민원총괄과', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
