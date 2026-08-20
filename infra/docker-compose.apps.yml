@@ -177,6 +177,8 @@ services:
         condition: service_healthy
       discovery-service:
         condition: service_started
+      mailpit:
+        condition: service_started
     ports:
       - "127.0.0.1:${NOTIFICATION_PORT:-8083}:8083"
     environment:
@@ -196,8 +198,8 @@ services:
       KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_TOPIC:-complaint.response.registered.v1}
       KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT: ${KAFKA_COMPLAINT_RESPONSE_REGISTERED_DLT:-complaint.response.registered.v1.dlt}
       USER_SERVICE_URL: http://user-service:8084
-      EMAIL_NOTIFICATIONS_ENABLED: ${EMAIL_NOTIFICATIONS_ENABLED:-false}
-      MAIL_HOST: ${MAIL_HOST:-localhost}
+      EMAIL_NOTIFICATIONS_ENABLED: ${EMAIL_NOTIFICATIONS_ENABLED:-true}
+      MAIL_HOST: ${MAIL_HOST:-mailpit}
       MAIL_PORT: ${MAIL_PORT:-1025}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
