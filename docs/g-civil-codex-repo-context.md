@@ -462,7 +462,7 @@ Request 예시:
 {
   "assignmentFound": true,
   "departmentId": 20,
-  "departmentName": "도로관리과",
+  "departmentName": "시설관리과",
   "officerUserId": 202,
   "officerName": "도로관리 담당자",
   "assignmentRuleId": 32,

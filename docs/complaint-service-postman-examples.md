@@ -105,7 +105,7 @@
         "title": "보도블록 정비 요청",
         "categoryCode": "FACILITY",
         "currentStatus": "COMPLETED",
-        "assignedDepartmentName": "도로관리과",
+        "assignedDepartmentName": "시설관리과",
         "assignedDepartmentId": 20,
         "assignedOfficerUserId": 202
       },

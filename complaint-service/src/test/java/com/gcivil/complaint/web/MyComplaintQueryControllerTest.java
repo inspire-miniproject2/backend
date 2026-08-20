@@ -60,7 +60,7 @@ class MyComplaintQueryControllerTest {
                 "FACILITY",
                 "보도블록 정비 요청",
                 ComplaintStatus.COMPLETED,
-                "도로관리과",
+                "시설관리과",
                 20L,
                 202L,
                 LocalDateTime.of(2026, 8, 18, 11, 0)
@@ -86,7 +86,7 @@ class MyComplaintQueryControllerTest {
                 .andExpect(jsonPath("$.data.summary.completed").value(1))
                 .andExpect(jsonPath("$.data.content.length()").value(3))
                 .andExpect(jsonPath("$.data.content[0].complaintNo").value("CIV-2026-000303"))
-                .andExpect(jsonPath("$.data.content[0].assignedDepartmentName").value("도로관리과"))
+                .andExpect(jsonPath("$.data.content[0].assignedDepartmentName").value("시설관리과"))
                 .andExpect(jsonPath("$.data.content[1].assignedDepartmentName").value("교통정책과"))
                 .andExpect(jsonPath("$.data.content[2].currentStatus").value("RECEIVED"));
     }
@@ -119,7 +119,7 @@ class MyComplaintQueryControllerTest {
                 "FACILITY",
                 "도로 포트홀 정비 요청",
                 ComplaintStatus.IN_PROGRESS,
-                "도로관리과",
+                "시설관리과",
                 20L,
                 202L,
                 LocalDateTime.of(2026, 8, 18, 11, 0)
