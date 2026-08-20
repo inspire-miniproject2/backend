@@ -90,6 +90,9 @@ public class ComplaintCommandService {
         complaintStatusHistoryService.record(complaint, null, ComplaintStatus.RECEIVED, applicantUserId, "민원 접수", now);
 
         List<NotifyChannel> notifyChannels = normalizeNotifyChannels(request.getNotifyChannels());
+        if (notifyChannels.contains(NotifyChannel.EMAIL)) {
+            complaint.enableEmailNotifications();
+        }
         ComplaintCreatedPayload createdPayload = new ComplaintCreatedPayload(
                 complaint.getId(),
                 complaint.getComplaintNo(),

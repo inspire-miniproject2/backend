@@ -12,12 +12,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gcivil.complaint.domain.Complaint;
 import com.gcivil.complaint.domain.ComplaintStatus;
 import com.gcivil.complaint.event.ComplaintEventPublisher;
+import com.gcivil.complaint.event.ComplaintResponseRegisteredPayload;
+import com.gcivil.complaint.event.NotifyChannel;
 import com.gcivil.complaint.repository.ComplaintRepository;
 import com.gcivil.complaint.repository.ComplaintResponseRepository;
 import com.gcivil.complaint.repository.ComplaintStatusHistoryRepository;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -80,6 +83,29 @@ class ComplaintResponseCommandControllerTest {
         assertThat(response.getComplaint().getId()).isEqualTo(complaint.getId());
         assertThat(response.getResponderUserId()).isEqualTo(201L);
         verify(complaintEventPublisher).publishComplaintResponseRegistered(any());
+    }
+
+    @Test
+    void registerResponseKeepsRequestedEmailNotificationChannel() throws Exception {
+        Complaint complaint = assignedComplaint();
+        complaint.enableEmailNotifications();
+        complaint = complaintRepository.save(complaint);
+
+        mockMvc.perform(post("/api/v1/officer/complaints/{complaintId}/response", complaint.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
+                        .content(objectMapper.writeValueAsString(new RequestBodyFixture(
+                                "이메일 알림 채널을 유지하는 공식 답변입니다.", true
+                        ))))
+                .andExpect(status().isCreated());
+
+        ArgumentCaptor<ComplaintResponseRegisteredPayload> captor =
+                ArgumentCaptor.forClass(ComplaintResponseRegisteredPayload.class);
+        verify(complaintEventPublisher).publishComplaintResponseRegistered(captor.capture());
+        assertThat(captor.getValue().notifyChannels())
+                .containsExactly(NotifyChannel.IN_APP, NotifyChannel.EMAIL);
     }
 
     @Test

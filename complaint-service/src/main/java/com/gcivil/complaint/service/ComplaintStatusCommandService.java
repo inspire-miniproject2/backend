@@ -23,8 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ComplaintStatusCommandService {
 
-    private static final List<NotifyChannel> DEFAULT_NOTIFY_CHANNELS = List.of(NotifyChannel.IN_APP);
-
     private final ComplaintRepository complaintRepository;
     private final ComplaintResponseRepository complaintResponseRepository;
     private final ComplaintStatusHistoryService complaintStatusHistoryService;
@@ -104,10 +102,16 @@ public class ComplaintStatusCommandService {
                 toOffsetDateTime(now),
                 changeMemo,
                 complaintResponse == null ? null : toOffsetDateTime(complaintResponse.getRespondedAt()),
-                DEFAULT_NOTIFY_CHANNELS
+                notifyChannelsFor(complaint)
         ));
 
         return new ChangeComplaintStatusResponse(previousStatus, newStatus, now);
+    }
+
+    private List<NotifyChannel> notifyChannelsFor(Complaint complaint) {
+        return complaint.isEmailNotificationEnabled()
+                ? List.of(NotifyChannel.IN_APP, NotifyChannel.EMAIL)
+                : List.of(NotifyChannel.IN_APP);
     }
 
     private ComplaintStatus parseStatus(String rawStatus) {

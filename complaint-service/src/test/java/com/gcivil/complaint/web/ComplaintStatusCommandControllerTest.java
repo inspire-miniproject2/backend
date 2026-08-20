@@ -13,12 +13,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gcivil.complaint.domain.Complaint;
 import com.gcivil.complaint.domain.ComplaintStatus;
 import com.gcivil.complaint.event.ComplaintEventPublisher;
+import com.gcivil.complaint.event.ComplaintStatusChangedPayload;
+import com.gcivil.complaint.event.NotifyChannel;
 import com.gcivil.complaint.repository.ComplaintRepository;
 import com.gcivil.complaint.repository.ComplaintResponseRepository;
 import com.gcivil.complaint.repository.ComplaintStatusHistoryRepository;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -78,6 +81,29 @@ class ComplaintStatusCommandControllerTest {
         Complaint updatedComplaint = complaintRepository.findById(complaint.getId()).orElseThrow();
         assertThat(updatedComplaint.getCurrentStatus()).isEqualTo(ComplaintStatus.IN_PROGRESS);
         verify(complaintEventPublisher).publishComplaintStatusChanged(any());
+    }
+
+    @Test
+    void changeStatusKeepsRequestedEmailNotificationChannel() throws Exception {
+        Complaint complaint = assignedComplaint();
+        complaint.enableEmailNotifications();
+        complaint = complaintRepository.save(complaint);
+
+        mockMvc.perform(patch("/api/v1/officer/complaints/{complaintId}/status", complaint.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", "201")
+                        .header("X-User-Role", "OFFICER")
+                        .header("X-Department-Id", "10")
+                        .content(objectMapper.writeValueAsString(new StatusRequestFixture(
+                                "IN_PROGRESS", "이메일 알림 채널 확인"
+                        ))))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<ComplaintStatusChangedPayload> captor =
+                ArgumentCaptor.forClass(ComplaintStatusChangedPayload.class);
+        verify(complaintEventPublisher).publishComplaintStatusChanged(captor.capture());
+        assertThat(captor.getValue().notifyChannels())
+                .containsExactly(NotifyChannel.IN_APP, NotifyChannel.EMAIL);
     }
 
     @Test
