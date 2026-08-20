@@ -1062,6 +1062,40 @@ Statistics Service가 Kafka 이벤트를 활용하여 DAILY_COMPLAINT_STATISTICS
 | 403 | FORBIDDEN | 관리자 권한 없음 |
 | 400 | VALIDATION_ERROR | 날짜 범위 형식 오류 |
 
+### 7.2 부서 목록 조회
+| Method | Endpoint | 인증 | 권한 | 성공 상태 |
+|---|---|---|---|---|
+| GET | `/api/v1/departments` | Bearer Token | 로그인 사용자 | 200 OK |
+
+통계 화면 등의 부서 필터에 사용할 활성 부서 목록을 ID 오름차순으로 조회합니다.
+
+**Response**
+| 필드 | 타입 | 설명 |
+|---|---|---|
+| data[].departmentId | long | 부서 ID |
+| data[].departmentName | string | 부서명 |
+
+**Success Example**
+```json
+{
+  "success": true,
+  "data": [
+    { "departmentId": 10, "departmentName": "교통정책과" },
+    { "departmentId": 20, "departmentName": "시설관리과" },
+    { "departmentId": 30, "departmentName": "환경관리과" },
+    { "departmentId": 40, "departmentName": "복지지원과" },
+    { "departmentId": 50, "departmentName": "민원총괄과" }
+  ],
+  "message": "부서 목록을 조회했습니다."
+}
+```
+
+**Error / 예외**
+| HTTP | error.code | 발생 조건 |
+|---|---|---|
+| 401 | UNAUTHORIZED | 인증 정보 없음 또는 유효하지 않은 토큰 |
+| 500 | INTERNAL_SERVER_ERROR | 부서 조회 실패 |
+
 ---
 
 ## 8. 서비스 간 통신 계약
