@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Entity
@@ -63,7 +64,7 @@ public class Notification {
         this.type = type;
         this.title = title;
         this.message = message;
-        this.createdAt = createdAt.toLocalDateTime();
+        this.createdAt = createdAt.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
     public void markAsRead(LocalDateTime now) {

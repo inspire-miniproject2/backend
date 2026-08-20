@@ -7,6 +7,7 @@ import com.gcivil.notification.domain.ProcessedEventRepository;
 import com.gcivil.notification.email.EmailNotificationService;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +42,8 @@ class NotificationEventHandlerTest {
         assertThat(captor.getValue().getUserId()).isEqualTo(501L);
         assertThat(captor.getValue().getComplaintId()).isEqualTo(1001L);
         assertThat(captor.getValue().getType()).isEqualTo(NotificationType.STATUS_CHANGED);
+        assertThat(captor.getValue().getCreatedAt())
+                .isEqualTo(LocalDateTime.parse("2026-08-15T00:31:00"));
         verify(emailService).sendStatusChanged(501L, "CIV-2026-000184", "RECEIVED", "ASSIGNED");
     }
 

@@ -34,7 +34,11 @@ class NotificationServiceTest {
         var response = service.markAsRead(501L, 10L);
 
         assertThat(response.read()).isTrue();
-        assertThat(response.readAt()).isEqualTo("2026-08-15T11:00:00");
+        assertThat(notification.getReadAt()).isEqualTo("2026-08-15T02:00:00");
+        assertThat(response.createdAt())
+                .isEqualTo(OffsetDateTime.parse("2026-08-15T10:00:00+09:00"));
+        assertThat(response.readAt())
+                .isEqualTo(OffsetDateTime.parse("2026-08-15T11:00:00+09:00"));
     }
 
     @Test

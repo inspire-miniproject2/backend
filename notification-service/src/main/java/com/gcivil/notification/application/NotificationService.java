@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 public class NotificationService {
@@ -42,7 +43,7 @@ public class NotificationService {
     public NotificationResponse markAsRead(Long userId, Long notificationId) {
         Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
                 .orElseThrow(() -> new NotificationNotFoundException(notificationId));
-        notification.markAsRead(LocalDateTime.now(clock));
+        notification.markAsRead(LocalDateTime.ofInstant(clock.instant(), ZoneOffset.UTC));
         return NotificationResponse.from(notification);
     }
 }
