@@ -101,6 +101,7 @@ class ComplaintCommandControllerTest {
 
         var storedComplaint = complaintRepository.findAll().get(0);
         org.assertj.core.api.Assertions.assertThat(storedComplaint.getCurrentStatus()).isEqualTo(ComplaintStatus.ASSIGNED);
+        org.assertj.core.api.Assertions.assertThat(storedComplaint.isEmailNotificationEnabled()).isTrue();
         org.assertj.core.api.Assertions.assertThat(complaintAttachmentRepository.countByComplaint_Id(storedComplaint.getId())).isEqualTo(1);
         org.assertj.core.api.Assertions.assertThat(
                 complaintStatusHistoryRepository.findByComplaint_IdOrderByChangedAtAsc(storedComplaint.getId())
@@ -132,6 +133,7 @@ class ComplaintCommandControllerTest {
 
         var storedComplaint = complaintRepository.findAll().get(0);
         org.assertj.core.api.Assertions.assertThat(storedComplaint.getCurrentStatus()).isEqualTo(ComplaintStatus.RECEIVED);
+        org.assertj.core.api.Assertions.assertThat(storedComplaint.isEmailNotificationEnabled()).isFalse();
         org.assertj.core.api.Assertions.assertThat(
                 complaintStatusHistoryRepository.findByComplaint_IdOrderByChangedAtAsc(storedComplaint.getId())
         ).hasSize(1);

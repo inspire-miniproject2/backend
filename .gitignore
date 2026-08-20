@@ -22,3 +22,4 @@
 
 # Local runtime data
 infra/data/
+tmp/

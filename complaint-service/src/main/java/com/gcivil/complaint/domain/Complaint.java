@@ -44,6 +44,9 @@ public class Complaint {
     @Column(name = "current_status", nullable = false, length = 30)
     private ComplaintStatus currentStatus;
 
+    @Column(name = "email_notification_enabled", nullable = false)
+    private boolean emailNotificationEnabled;
+
     @Column(name = "assigned_department_id")
     private Long assignedDepartmentId;
 
@@ -92,6 +95,7 @@ public class Complaint {
         this.title = title;
         this.content = content;
         this.currentStatus = currentStatus;
+        this.emailNotificationEnabled = false;
         this.submittedAt = submittedAt;
         this.createdAt = createdAt;
         this.updatedAt = createdAt;
@@ -100,6 +104,10 @@ public class Complaint {
     public void addAttachment(ComplaintAttachment attachment) {
         attachments.add(attachment);
         attachment.attachTo(this);
+    }
+
+    public void enableEmailNotifications() {
+        this.emailNotificationEnabled = true;
     }
 
     public void markAssigned(String departmentName, Long departmentId, Long officerUserId, LocalDateTime assignedAt) {
@@ -156,6 +164,10 @@ public class Complaint {
 
     public ComplaintStatus getCurrentStatus() {
         return currentStatus;
+    }
+
+    public boolean isEmailNotificationEnabled() {
+        return emailNotificationEnabled;
     }
 
     public Long getAssignedDepartmentId() {
